@@ -33,3 +33,8 @@ Replace /usr/lib/apache2/modules/mod_cloudflare.so with the path to mod_cloudfla
 If you cannot find apxs or apxs2, on a Debian or Ubuntu distro you can install this tool with:
 
 # apt-get install apache2-prefork-dev
+
+NOTES: 
+
+*) If mod_cloudflare and mod_remoteip are enabled on the same web server, the server will crash if they both try to set the remote IP to a different value.
+*) Enableing mod_cloudflare will not effect the performance of Apache in any noticable maner. AB testing both over LAN and WAN show no equalilent numbers with and without mod_cloudflare.

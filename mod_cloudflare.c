@@ -15,9 +15,9 @@
  *
  * Derived from mod_remoteip.c.
  * Default values for directives are hard-wired for CloudFlare defaults.
- * 
+ *
  * Supported directives and defaults:
- * 
+ *
  * CloudFlareIPHeader CF-Connecting-IP
  * CloudFlareIPTrustedProxy 204.93.173.0/24
  */
@@ -50,9 +50,9 @@ typedef struct {
 typedef struct {
     /** The header to retrieve a proxy-via ip list */
     const char *header_name;
-    /** A header to record the proxied IP's 
-     * (removed as the physical connection and 
-     * from the proxy-via ip header value list) 
+    /** A header to record the proxied IP's
+     * (removed as the physical connection and
+     * from the proxy-via ip header value list)
      */
     const char *proxies_header_name;
     /** A list of trusted proxies, ideally configured
@@ -76,12 +76,21 @@ typedef struct {
     apr_sockaddr_t proxied_addr;
 } cloudflare_conn_t;
 
+static apr_status_t set_cf_default_proxies(apr_pool_t *p, cloudflare_config_t *config);
+
 static void *create_cloudflare_server_config(apr_pool_t *p, server_rec *s)
 {
     cloudflare_config_t *config = apr_pcalloc(p, sizeof *config);
     /* config->header_name = NULL;
      * config->proxies_header_name = NULL;
      */
+    if (config == NULL) {
+        return NULL;
+    }
+    if (set_cf_default_proxies(p, config) != APR_SUCCESS) {
+        return NULL;
+    }
+    config->header_name = CF_DEFAULT_IP_HEADER;
     return config;
 }
 
@@ -129,26 +138,20 @@ static int looks_like_ip(const char *ipstr)
     return (*ipstr == '\0');
 }
 
-static const char *set_cf_default_proxies(request_rec *r, cloudflare_config_t *config) 
+static apr_status_t set_cf_default_proxies(apr_pool_t *p, cloudflare_config_t *config)
 {
      apr_status_t rv;
      cloudflare_proxymatch_t *match;
-     char *ip = apr_pstrdup(r->pool, CF_DEFAULT_TRUSTED_PROXY);
+     char *ip = apr_pstrdup(p, CF_DEFAULT_TRUSTED_PROXY);
      char *s = ap_strchr(ip, '/');
-    if (s)
-        *s++ = '\0';
-    
-    if (!config->proxymatch_ip)
-        config->proxymatch_ip = apr_array_make(r->pool, 1, sizeof(*match));
-    match = (cloudflare_proxymatch_t *) apr_array_push(config->proxymatch_ip);
-    rv = apr_ipsubnet_create(&match->ip, ip, s, r->pool);
-    if (rv != APR_SUCCESS) {
-        char msgbuf[128];
-        apr_strerror(rv, msgbuf, sizeof(msgbuf));
-        return apr_pstrcat(r->pool, "CloudFlare: Error loading default trusted IP ", CF_DEFAULT_TRUSTED_PROXY, 
-                           " (", msgbuf, " error) for ", "cloudflare", NULL);
-    }
-    return NULL;
+     if (s)
+         *s++ = '\0';
+
+     if (!config->proxymatch_ip)
+         config->proxymatch_ip = apr_array_make(p, 1, sizeof(*match));
+     match = (cloudflare_proxymatch_t *) apr_array_push(config->proxymatch_ip);
+     rv = apr_ipsubnet_create(&match->ip, ip, s, p);
+     return rv;
 }
 
 static const char *proxies_set(cmd_parms *cmd, void *internal,
@@ -177,8 +180,8 @@ static const char *proxies_set(cmd_parms *cmd, void *internal,
         apr_sockaddr_t *temp_sa;
 
         if (s) {
-            return apr_pstrcat(cmd->pool, "RemoteIP: Error parsing IP ", arg, 
-                               " the subnet /", s, " is invalid for ", 
+            return apr_pstrcat(cmd->pool, "RemoteIP: Error parsing IP ", arg,
+                               " the subnet /", s, " is invalid for ",
                                cmd->cmd->name, NULL);
         }
 
@@ -190,7 +193,7 @@ static const char *proxies_set(cmd_parms *cmd, void *internal,
             rv = apr_ipsubnet_create(&match->ip, ip, NULL, cmd->pool);
             if (!(temp_sa = temp_sa->next))
                 break;
-            match = (cloudflare_proxymatch_t *) 
+            match = (cloudflare_proxymatch_t *)
                     apr_array_push(config->proxymatch_ip);
             match->internal = internal;
         }
@@ -199,7 +202,7 @@ static const char *proxies_set(cmd_parms *cmd, void *internal,
     if (rv != APR_SUCCESS) {
         char msgbuf[128];
         apr_strerror(rv, msgbuf, sizeof(msgbuf));
-        return apr_pstrcat(cmd->pool, "RemoteIP: Error parsing IP ", arg, 
+        return apr_pstrcat(cmd->pool, "RemoteIP: Error parsing IP ", arg,
                            " (", msgbuf, " error) for ", cmd->cmd->name, NULL);
     }
 
@@ -211,11 +214,6 @@ static int cloudflare_modify_connection(request_rec *r)
     conn_rec *c = r->connection;
     cloudflare_config_t *config = (cloudflare_config_t *)
         ap_get_module_config(r->server->module_config, &cloudflare_module);
-
-    // Use the default if an override is not already set.
-    if (!config->header_name) {
-        config->header_name = CF_DEFAULT_IP_HEADER;
-    }
 
     cloudflare_conn_t *conn;
 #ifdef REMOTEIP_OPTIMIZED
@@ -232,10 +230,6 @@ static int cloudflare_modify_connection(request_rec *r)
     unsigned char *addrbyte;
     void *internal = NULL;
 
-    if (!remote) {
-        return OK;
-    }
-    
     apr_pool_userdata_get((void*)&conn, "mod_cloudflare-conn", c->pool);
 
     if (conn) {
@@ -252,12 +246,11 @@ static int cloudflare_modify_connection(request_rec *r)
         }
     }
 
-    remote = apr_pstrdup(r->pool, remote);
-
-    // Set the default CloudFlare trusted proxy if one is not already set.
-    if (!config->proxymatch_ip) {
-        set_cf_default_proxies(r, config);
+    if (!remote) {
+        return OK;
     }
+
+    remote = apr_pstrdup(r->pool, remote);
 
 #ifdef REMOTEIP_OPTIMIZED
     memcpy(&temp_sa, c->remote_addr, sizeof(temp_sa));
@@ -265,8 +258,6 @@ static int cloudflare_modify_connection(request_rec *r)
 #else
     temp_sa = c->remote_addr;
 #endif
-
-    //    ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "in cf modify conn %s 111", remote);
 
     while (remote) {
 
@@ -294,7 +285,7 @@ static int cloudflare_modify_connection(request_rec *r)
             *(parse_remote++) = '\0';
         }
 
-        while (*parse_remote == ' ') 
+        while (*parse_remote == ' ')
             ++parse_remote;
 
         eos = parse_remote + strlen(parse_remote) - 1;
@@ -311,12 +302,12 @@ static int cloudflare_modify_connection(request_rec *r)
 
 #ifdef REMOTEIP_OPTIMIZED
         /* Decode remote_addr - sucks; apr_sockaddr_vars_set isn't 'public' */
-        if (inet_pton(AF_INET, parse_remote, 
+        if (inet_pton(AF_INET, parse_remote,
                       &temp_sa_buff->sa.sin.sin_addr) > 0) {
             apr_sockaddr_vars_set(temp_sa, APR_INET, temp_sa.port);
         }
 #if APR_HAVE_IPV6
-        else if (inet_pton(AF_INET6, parse_remote, 
+        else if (inet_pton(AF_INET6, parse_remote,
                            &temp_sa->sa.sin6.sin6_addr) > 0) {
             apr_sockaddr_vars_set(temp_sa, APR_INET6, temp_sa.port);
         }
@@ -325,9 +316,9 @@ static int cloudflare_modify_connection(request_rec *r)
             rv = apr_get_netos_error();
 #else /* !REMOTEIP_OPTIMIZED */
         /* We map as IPv4 rather than IPv6 for equivilant host names
-         * or IPV4OVERIPV6 
+         * or IPV4OVERIPV6
          */
-        rv = apr_sockaddr_info_get(&temp_sa,  parse_remote, 
+        rv = apr_sockaddr_info_get(&temp_sa,  parse_remote,
                                    APR_UNSPEC, temp_sa->port,
                                    APR_IPV4_ADDR_OK, r->pool);
         if (rv != APR_SUCCESS) {
@@ -350,7 +341,7 @@ static int cloudflare_modify_connection(request_rec *r)
               && ((temp_sa->family == APR_INET
                    /* For internet (non-Internal proxies) deny all
                     * RFC3330 designated local/private subnets:
-                    * 10.0.0.0/8   169.254.0.0/16  192.168.0.0/16 
+                    * 10.0.0.0/8   169.254.0.0/16  192.168.0.0/16
                     * 127.0.0.0/8  172.16.0.0/12
                     */
                       && (addrbyte[0] == 10
@@ -360,7 +351,7 @@ static int cloudflare_modify_connection(request_rec *r)
                        || (addrbyte[0] == 192 && addrbyte[1] == 168)))
 #if APR_HAVE_IPV6
                || (temp_sa->family == APR_INET6
-                   /* For internet (non-Internal proxies) we translated 
+                   /* For internet (non-Internal proxies) we translated
                     * IPv4-over-IPv6-mapped addresses as IPv4, above.
                     * Accept only Global Unicast 2000::/3 defined by RFC4291
                     */
@@ -388,7 +379,7 @@ static int cloudflare_modify_connection(request_rec *r)
         /* Set remote_ip string */
         if (!internal) {
             if (proxy_ips)
-                proxy_ips = apr_pstrcat(r->pool, proxy_ips, ", ", 
+                proxy_ips = apr_pstrcat(r->pool, proxy_ips, ", ",
                                         c->remote_ip, NULL);
             else
                 proxy_ips = c->remote_ip;
@@ -402,7 +393,7 @@ static int cloudflare_modify_connection(request_rec *r)
     if (!conn || (c->remote_addr == conn->orig_addr))
         return OK;
 
-    /* Fixups here, remote becomes the new Via header value, etc 
+    /* Fixups here, remote becomes the new Via header value, etc
      * In the heavy operations above we used request scope, to limit
      * conn pool memory growth on keepalives, so here we must scope
      * the final results to the connection pool lifetime.
@@ -418,7 +409,7 @@ static int cloudflare_modify_connection(request_rec *r)
     if (remote)
         remote = apr_pstrdup(c->pool, remote);
     conn->proxied_remote = remote;
-    conn->prior_remote = apr_pstrdup(c->pool, apr_table_get(r->headers_in, 
+    conn->prior_remote = apr_pstrdup(c->pool, apr_table_get(r->headers_in,
                                                       config->header_name));
     if (proxy_ips)
         proxy_ips = apr_pstrdup(c->pool, proxy_ips);
@@ -442,7 +433,7 @@ ditto_request_rec:
     }
 
     ap_log_rerror(APLOG_MARK, APLOG_INFO|APLOG_NOERRNO, 0, r,
-                  conn->proxy_ips 
+                  conn->proxy_ips
                       ? "Using %s as client's IP by proxies %s"
                       : "Using %s as client's IP by internal proxies",
                   conn->proxied_ip, conn->proxy_ips);

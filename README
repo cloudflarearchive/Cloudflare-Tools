@@ -38,3 +38,40 @@ NOTES:
 
 *) If mod_cloudflare and mod_remoteip are enabled on the same web server, the server will crash if they both try to set the remote IP to a different value.
 *) Enableing mod_cloudflare will not effect the performance of Apache in any noticable maner. AB testing both over LAN and WAN show no equalilent numbers with and without mod_cloudflare.
+
+======> ddclient
+
+A port of ddclient (http://sourceforge.net/projects/ddclient/) this includes support for using the CloudFlare dynamic DNS updating system.
+** We are working to integrate the CloudFlare patch into the projects main branch, but this has not happened yet. **
+
+-------------------------------------------------------------------------------
+REQUIREMENTS:
+
+- Perl 5.004 or later
+  (you need the IO::Socket::SSL perl library for ssl-support)
+
+-------------------------------------------------------------------------------
+INSTALLATION:
+
+  cp ddclient /usr/sbin/
+  mkdir /etc/ddclient
+  mkdir /var/cache/ddclient
+  cp sample-etc_ddclient.conf /etc/ddclient/ddclient.conf
+  vi /etc/ddclient/ddclient.conf
+  -- and change hostnames, logins, and passwords appropriately 
+
+For CloudFlare, this should be:
+
+##
+## CloudFlare (cloudflare.com)
+##
+ssl=yes	
+protocol=cloudflare,                           \
+server=www.cloudflare.com,                     \
+login=myemail@foo.com                          \
+password=my-cloudflare-auth-token              \
+my-awsome-site.com,
+
+To run in debug mode: ddclient -daemon=0 -debug -verbose -noquiet
+
+See the docs at http://sourceforge.net/projects/ddclient for full configuration and installation instructions.

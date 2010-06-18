@@ -421,6 +421,7 @@ static int cloudflare_modify_connection(request_rec *r)
 
 ditto_request_rec:
 
+    // Why do we unset the headers here?
     //if (conn->proxied_remote) {
     //    apr_table_setn(r->headers_in, config->header_name, conn->proxied_remote);
     //} else {

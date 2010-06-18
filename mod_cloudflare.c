@@ -420,11 +420,13 @@ static int cloudflare_modify_connection(request_rec *r)
     c->remote_logname = NULL;
 
 ditto_request_rec:
-    if (conn->proxied_remote)
-        apr_table_setn(r->headers_in, config->header_name,
-                       conn->proxied_remote);
-    else
-        apr_table_unset(r->headers_in, config->header_name);
+
+    //if (conn->proxied_remote) {
+    //    apr_table_setn(r->headers_in, config->header_name, conn->proxied_remote);
+    //} else {
+    //    apr_table_unset(r->headers_in, config->header_name);
+    // }
+
     if (conn->proxy_ips) {
         apr_table_setn(r->notes, "cloudflare-proxy-ip-list", conn->proxy_ips);
         if (config->proxies_header_name)

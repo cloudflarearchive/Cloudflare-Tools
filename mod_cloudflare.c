@@ -404,7 +404,8 @@ static int cloudflare_modify_connection(request_rec *r)
     conn->proxied_ip = c->remote_ip;
     memcpy(&conn->proxied_addr, &temp_sa, sizeof(temp_sa));
     conn->proxied_addr.pool = c->pool;
-    c->remote_addr = &conn->proxied_addr;
+    // Causing an error with mod_authz_host
+    // c->remote_addr = &conn->proxied_addr;
 
     if (remote)
         remote = apr_pstrdup(c->pool, remote);

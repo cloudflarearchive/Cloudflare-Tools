@@ -38,7 +38,8 @@
 module AP_MODULE_DECLARE_DATA cloudflare_module;
 
 #define CF_DEFAULT_IP_HEADER "CF-Connecting-IP"
-#define CF_DEFAULT_TRUSTED_PROXY "204.93.173.0/24"
+#define CF_DEFAULT_TRUSTED_PROXY {"66.225.125.0/24", "204.93.240.0/24", "204.93.177.0/24", "204.93.173.0/24"}
+#define CF_DEFAULT_TRUSTED_PROXY_COUNT 4
 
 typedef struct {
     /** A proxy IP mask to match */
@@ -142,15 +143,23 @@ static apr_status_t set_cf_default_proxies(apr_pool_t *p, cloudflare_config_t *c
 {
      apr_status_t rv;
      cloudflare_proxymatch_t *match;
-     char *ip = apr_pstrdup(p, CF_DEFAULT_TRUSTED_PROXY);
-     char *s = ap_strchr(ip, '/');
-     if (s)
-         *s++ = '\0';
+     int i;
+     char *proxies[] = CF_DEFAULT_TRUSTED_PROXY;
 
-     if (!config->proxymatch_ip)
-         config->proxymatch_ip = apr_array_make(p, 1, sizeof(*match));
-     match = (cloudflare_proxymatch_t *) apr_array_push(config->proxymatch_ip);
-     rv = apr_ipsubnet_create(&match->ip, ip, s, p);
+     for (i=0; i<CF_DEFAULT_TRUSTED_PROXY_COUNT; i++) {
+         char *ip = apr_pstrdup(p, proxies[i]);
+         char *s = ap_strchr(ip, '/');
+
+         if (s) {
+             *s++ = '\0';
+         }
+         if (!config->proxymatch_ip) {
+             config->proxymatch_ip = apr_array_make(p, 1, sizeof(*match));
+         }
+         
+         match = (cloudflare_proxymatch_t *) apr_array_push(config->proxymatch_ip);
+         rv = apr_ipsubnet_create(&match->ip, ip, s, p);
+     }
      return rv;
 }
 
@@ -451,7 +460,7 @@ static const command_rec cloudflare_cmds[] =
                   "Overrides the default of CF-Connecting-IP"),
     AP_INIT_ITERATE("CloudFlareRemoteIPTrustedProxy", proxies_set, 0, RSRC_CONF,
                     "Specifies one or more proxies which are trusted "
-                    "to present IP headers. Overrides the default of 204.93.173.0/24"),
+                    "to present IP headers. Overrides the defaults."),
     { NULL }
 };
 

@@ -3558,8 +3558,7 @@ sub nic_freedns_update {
 ##
 ## written by Ian Pye
 ##
-## https://www.cloudflare.com/api/dipup?user=myemail@mydomain.com&pass=SecretPass&ip=192.168.10.4
-## &hosts=www.host.com,mx.host.com,test.host.com
+## https://www.cloudflare.com/api.html?a=DIUP&u=myemail@mydomain.com&tkn=SecretPass&ip=192.168.10.4&hosts=example.com
 ##
 ######################################################################
 sub nic_cloudflare_examples {
@@ -3622,12 +3621,10 @@ sub nic_cloudflare_update {
         
         info("setting IP address to %s for %s", $ip, $hosts);
         verbose("UPDATE:","updating %s", $hosts);
-        
-        #'https://www.cloudflare.com:80/api/dipup.html'
-        
+                
         my $url;
-        $url   = "http://$config{$h}{'server'}/api/dipup.html";
-        $url  .= "?hosts=$hosts";
+        $url   = "https://$config{$h}{'server'}/api.html?a=DIUP";
+        $url  .= "&hosts=$hosts";
         $url  .= "&u=".$config{$h}{'login'};	
         $url  .= "&tkn=".$config{$h}{'password'};    
         $url  .= "&ip=";

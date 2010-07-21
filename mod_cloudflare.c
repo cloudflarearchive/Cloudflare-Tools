@@ -59,6 +59,11 @@ typedef struct {
     /** A list of trusted proxies, ideally configured
      *  with the most commonly encountered listed first
      */
+    
+    int deny_all;
+    /** If this flag is set, only allow requests which originate from a CF Trusted Proxy IP.
+     * Return 403 otherwise.
+     */
     apr_array_header_t *proxymatch_ip;
 } cloudflare_config_t;
 
@@ -121,6 +126,14 @@ static const char *header_name_set(cmd_parms *cmd, void *dummy,
     cloudflare_config_t *config = ap_get_module_config(cmd->server->module_config,
                                                        &cloudflare_module);
     config->header_name = apr_pstrdup(cmd->pool, arg);
+    return NULL;
+}
+
+static const char *deny_all_set(cmd_parms *cmd, void *dummy)
+{
+    cloudflare_config_t *config = ap_get_module_config(cmd->server->module_config,
+                                                       &cloudflare_module);
+    config->deny_all = 1;
     return NULL;
 }
 
@@ -282,8 +295,13 @@ static int cloudflare_modify_connection(request_rec *r)
                     break;
                 }
             }
-            if (i && i >= config->proxymatch_ip->nelts)
-                break;
+            if (i && i >= config->proxymatch_ip->nelts) {
+                if (config->deny_all) {
+                    return 403;
+                } else {
+                    break;
+                }
+            }
         }
 
         if ((parse_remote = strrchr(remote, ',')) == NULL) {
@@ -461,6 +479,9 @@ static const command_rec cloudflare_cmds[] =
     AP_INIT_ITERATE("CloudFlareRemoteIPTrustedProxy", proxies_set, 0, RSRC_CONF,
                     "Specifies one or more proxies which are trusted "
                     "to present IP headers. Overrides the defaults."),
+    AP_INIT_NO_ARGS("DenyAllButCloudFlare", deny_all_set, NULL, RSRC_CONF,
+                    "Return a 403 status to all requests which do not originate from " 
+                    "a CloudFlareRemoteIPTrustedProxy."),
     { NULL }
 };
 

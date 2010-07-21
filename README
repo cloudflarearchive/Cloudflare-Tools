@@ -41,6 +41,7 @@ NOTES:
 
 *) If mod_cloudflare and mod_remoteip are enabled on the same web server, the server will crash if they both try to set the remote IP to a different value.
 *) Enableing mod_cloudflare will not effect the performance of Apache in any noticable maner. AB testing both over LAN and WAN show no equalilent numbers with and without mod_cloudflare.
+*) If you like, you may also add the directive DenyAllButCloudFlare. This will result in all requests from IPs which are not in the CloudFlareRemoteIPTrustedProxy range being denied with a status of 403.
 
 ======> ddclient
 

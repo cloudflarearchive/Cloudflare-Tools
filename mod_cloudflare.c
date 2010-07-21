@@ -466,7 +466,9 @@ static const command_rec cloudflare_cmds[] =
 
 static void register_hooks(apr_pool_t *p)
 {
-    ap_hook_post_read_request(cloudflare_modify_connection, NULL, NULL, APR_HOOK_FIRST);
+    // We need to run very early so as to not trip up mod_security. 
+    // Hence, this little trick, as mod_security runs at APR_HOOK_REALLY_FIRST.
+    ap_hook_post_read_request(cloudflare_modify_connection, NULL, NULL, APR_HOOK_REALLY_FIRST - 10);
 }
 
 module AP_MODULE_DECLARE_DATA cloudflare_module = {

@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 #!/usr/local/bin/perl -w
 ######################################################################
-# $Id: ddclient 116 2010-02-24 23:05:22Z wimpunk $
+# $Id: ddclient 120 2010-09-14 11:19:47Z wimpunk $
 #
 # DDCLIENT - a Perl client for updating DynDNS information
 #
@@ -20,7 +20,7 @@ use Getopt::Long;
 use Sys::Hostname;
 use IO::Socket;
 
-my ($VERSION) = q$Revision: 116 $ =~ /(\d+)/;
+my ($VERSION) = q$Revision: 120 $ =~ /(\d+)/;
 
 my $version  = "3.8.0-r". $VERSION;
 my $programd  = $0; 
@@ -883,9 +883,9 @@ sub read_cache {
 	%opt   = %saved;
 
 	foreach my $h (keys %cache) {
-	    if (exists $config{$h}) {
+	    if (exists $config->{$h}) {
 		foreach (qw(atime mtime wtime ip status)) {
-	    	    $config{$h}{$_} = $cache{$h}{$_} if exists $cache{$h}{$_};
+	    	    $config->{$h}{$_} = $cache{$h}{$_} if exists $cache{$h}{$_};
 		}
 	    }
 	}
@@ -1097,7 +1097,7 @@ sub init_config {
     $opt{'use'} = 'web' if !define($opt{'use'}) && defined($opt{'web'});
 
     ## sanity check
-    $opt{'max-interval'}       = max(interval(opt('max-interval')), interval(default('max-interval')));
+    $opt{'max-interval'}       = min(interval(opt('max-interval')), interval(default('max-interval')));
     $opt{'min-interval'}       = max(interval(opt('min-interval')), interval(default('min-interval')));
     $opt{'min-error-interval'} = max(interval(opt('min-error-interval')), interval(default('min-error-interval')));
 
@@ -1135,7 +1135,7 @@ sub init_config {
 	## merge options into host definitions or globals
 	if (@hosts) {
 	    foreach my $h (@hosts) {
-		$config{$h} = %{ merge(\%options, $config{$h}) };
+		$config{$h} = merge(\%options, $config{$h});
 	    }
 	    $opt{'host'} = join(',', @hosts);
 	} else {
@@ -1758,6 +1758,7 @@ sub load_ssl_support {
         fatal(<<"EOM");
 Error loading the Perl module IO::Socket::SSL needed for SSL connect.
 On Debian, the package libio-socket-ssl-perl must be installed.
+On Red Hat, the package perl-IO-Socket-SSL must be installed.
 EOM
     }
     import  IO::Socket::SSL;
@@ -2457,6 +2458,8 @@ sub nic_dyndns2_update {
 
 	my @reply = split /\n/, $reply;
 	my $state = 'header';
+	my $returnedip = $ip;
+
 	foreach my $line (@reply) {
 	    if ($state eq 'header') {
 		$state = 'body';
@@ -2467,7 +2470,10 @@ sub nic_dyndns2_update {
 	    } elsif ($state =~ /^results/) {
 		$state = 'results2';
 
-		my ($status, $ip) = split / /, lc $line;
+		# bug #10: some dyndns providers does not return the IP so
+		# we can't use the returned IP
+		my ($status, $returnedip) = split / /, lc $line;
+		$ip = $returnedip if (not $ip);
 		my $h = shift @hosts;
 	    
 		$config{$h}{'status'} = $status;

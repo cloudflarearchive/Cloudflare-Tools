@@ -38,8 +38,8 @@
 module AP_MODULE_DECLARE_DATA cloudflare_module;
 
 #define CF_DEFAULT_IP_HEADER "CF-Connecting-IP"
-#define CF_DEFAULT_TRUSTED_PROXY {"66.225.125.0/24", "204.93.240.0/24", "204.93.177.0/24", "204.93.173.0/24", "199.27.128.0/21"}
-#define CF_DEFAULT_TRUSTED_PROXY_COUNT 5
+#define CF_DEFAULT_TRUSTED_PROXY {"204.93.240.0/24", "204.93.177.0/24", "204.93.173.0/24", "199.27.128.0/21"}
+#define CF_DEFAULT_TRUSTED_PROXY_COUNT 4
 
 typedef struct {
     /** A proxy IP mask to match */

@@ -20,6 +20,8 @@
  *
  * CloudFlareIPHeader CF-Connecting-IP
  * CloudFlareIPTrustedProxy 204.93.173.0/24
+ *
+ * Version 1.0.0
  */
 
 #include "ap_config.h"

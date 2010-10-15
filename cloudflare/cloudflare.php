@@ -146,6 +146,9 @@ function cloudflare_conf() {
     <div class="wrap">
     <h2><?php _e('CloudFlare Configuration'); ?></h2>
     <div class="narrow">
+
+    <?php /**
+
     <form action="" method="post" id="cloudflare-conf" style="margin: auto; width: 400px; ">
     <?php if (get_option('cloudflare_api_key') && get_option('cloudflare_api_email')) { ?>
     <p><?php printf(__('CloudFlare is accelerating and protecting your site.')); ?></p>
@@ -165,10 +168,13 @@ function cloudflare_conf() {
 
     <hr />
 
+    */ ?>
+
     <form action="" method="post" id="cloudflare-db" style="margin: auto; width: 400px; ">
     <input type="hidden" name="optimize" value="1" />
-    <h3><label for="optimize_db"><?php _e('Make your site run faster'); ?></label></h3>
-    <p class="submit"><input type="submit" name="submit" value="<?php _e('Run the optimizer'); ?>" /> (<?php _e('<a href="http://cloudflare.com/">What is this?</a>'); ?>)</p>
+    <p class="submit">
+    <h3><label for="optimize_db"><?php _e('Make your site run faster: '); ?></label></h3>
+    <input type="submit" name="submit" value="<?php _e('Run the optimizer'); ?>" /> (<?php _e('<a href="http://www.cloudflare.com/wiki/WordPressDBOptimizer">What is this?</a>'); ?>)</p>
     </form>
 
     </div>
@@ -181,6 +187,7 @@ function cloudflare_admin_warnings() {
     global $cloudflare_api_key, $cloudflare_api_email; 
     load_cloudflare_keys();
 
+    /**
 	if ( !get_option('cloudflare_api_key_set_once') && !$cloudflare_api_key && !isset($_POST['submit']) ) {
 		function cloudflare_warning() {
 			echo "
@@ -198,7 +205,8 @@ function cloudflare_admin_warnings() {
 		add_action('admin_notices', 'cloudflare_warning');
 		return;
 	} 
-
+    */
+    
     // Check to see if they should optimized their DB
     $last_run_time = (int)get_option('cloudflare_api_db_last_run');
     if (!$last_run_time || time() - $last_run_time > 5259487) {

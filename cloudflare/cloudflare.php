@@ -21,6 +21,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with this program; if not, write to the Free Software 
 Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA 
+
+Plugin adapted from the Akismet WP plugin.
+
 */	
 
 define('CLOUDFLARE_VERSION', '1.0.0');
@@ -212,7 +215,7 @@ function cloudflare_admin_warnings() {
     if (!$last_run_time || time() - $last_run_time > 5259487) {
         function cloudflare_warning() {
 			echo "
-			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('Your Database is due to be optimized again.')."</strong> ".sprintf(__('We reccomend that you <a href="%1$s">run the CloudFlare optimizer</a> at least once every few months to keep your blog running quickly.'), "plugins.php?page=cloudflare-key-config")."</p></div>
+			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('Your Database is due to be optimized again.')."</strong> ".sprintf(__('We recommend that you <a href="%1$s">run the CloudFlare optimizer</a> at least once every few months to keep your blog running quickly.'), "plugins.php?page=cloudflare-key-config")."</p></div>
 			";
 		}
 		add_action('admin_notices', 'cloudflare_warning');

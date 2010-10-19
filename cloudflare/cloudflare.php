@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: CloudFlare
-Plugin URI: http://cloudflare.com/
+Plugin URI: http://www.cloudflare.com/wiki/CloudFlareWordPressPlugin
 Description: CloudFlare integrates your blog with the CloudFlare platform.
 Version: 1.0.0
-Author: Ian Pye
+Author: Ian Pye (CloudFlare Team)
 License: GPLv2
 */
 
@@ -36,12 +36,13 @@ if ( !function_exists( 'add_action' ) ) {
 }
 
 function cloudflare_init() {
-	global $cf_api_host, $cf_api_port;
+	global $cf_api_host, $cf_api_port, $is_cf;
 
     $cf_api_host = "https://www.cloudflare.com/api.html?";
     $cf_api_port = 80;
     $cf_ip_ranges = array("204.93.240.0/24", "204.93.177.0/24", "204.93.173.0/24", "199.27.128.0/21");
-    
+    $is_cf = ($_SERVER["HTTP_CF_CONNECTING_IP"])? TRUE: FALSE;    
+
     // Update the REMOTE_ADDR value if the current REMOTE_ADDR value is in the specified range.
     foreach ($cf_ip_ranges as $range) {
         if (ip_in_range($_SERVER["REMOTE_ADDR"], $range)) {
@@ -51,9 +52,9 @@ function cloudflare_init() {
             break;
         }
     }
-	add_action('admin_menu', 'cloudflare_config_page');
+	Add_action('admin_menu', 'cloudflare_config_page');
 	cloudflare_admin_warnings();
-} 
+}
 add_action('init', 'cloudflare_init');
 
 function cloudflare_admin_init() {
@@ -81,7 +82,7 @@ function load_cloudflare_keys () {
 function cloudflare_conf() {
     if ( function_exists('current_user_can') && !current_user_can('manage_options') )
         die(__('Cheatin&#8217; uh?'));
-    global $cloudflare_api_key, $cloudflare_api_email;
+    global $cloudflare_api_key, $cloudflare_api_email, $is_cf;
     global $wpdb;
 
     $db_results = array();
@@ -120,6 +121,7 @@ function cloudflare_conf() {
                           'new_email_valid' => array('color' => '2d2', 'text' => __('Your email has been verified. Happy blogging!')),
                           );
     } else if ( isset($_POST['submit']) && isset($_POST['optimize']) ) {
+        update_option('cloudflare_api_db_last_run', time());
         if(current_user_can('manage_database')) {
             remove_action('admin_notices', 'cloudflare_warning');
             $tables = $wpdb->get_col("SHOW TABLES");
@@ -131,7 +133,6 @@ function cloudflare_conf() {
                 }
             }
             if (count($db_results) == 0) {
-                update_option('cloudflare_api_db_last_run', time());
                 $db_results[] = "All tables optimized without error.";
             }
         }
@@ -173,10 +174,16 @@ function cloudflare_conf() {
 
     */ ?>
 
+    <?php if ($is_cf) { ?>
+    <h3>Congratulations! Your site is being accelerated and protected via CloudFlare.</h3>
+    <?php } else { ?>
+    <h3>Sign up your site for <a href="http://www.cloudflare.com/">CloudFlare</a> today.</h3>
+    <?php } ?>
+
     <form action="" method="post" id="cloudflare-db" style="margin: auto; width: 400px; ">
     <input type="hidden" name="optimize" value="1" />
     <p class="submit">
-    <h3><label for="optimize_db"><?php _e('Make your site run faster: '); ?></label></h3>
+    <h3><label for="optimize_db"><?php _e('Make your site run even faster: '); ?></label></h3>
     <input type="submit" name="submit" value="<?php _e('Run the optimizer'); ?>" /> (<?php _e('<a href="http://www.cloudflare.com/wiki/WordPressDBOptimizer">What is this?</a>'); ?>)</p>
     </form>
 
@@ -212,10 +219,19 @@ function cloudflare_admin_warnings() {
     
     // Check to see if they should optimized their DB
     $last_run_time = (int)get_option('cloudflare_api_db_last_run');
-    if (!$last_run_time || time() - $last_run_time > 5259487) {
+    if (!$last_run_time) {
         function cloudflare_warning() {
 			echo "
-			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('Your Database is due to be optimized again.')."</strong> ".sprintf(__('We recommend that you <a href="%1$s">run the CloudFlare optimizer</a> at least once every few months to keep your blog running quickly.'), "plugins.php?page=cloudflare-key-config")."</p></div>
+			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('Optimize your Database.')."</strong> ".sprintf(__('We recommend that you <a href="%1$s">run the CloudFlare optimizer</a> to keep your blog running quickly.'), "plugins.php?page=cloudflare-key-config")."</p></div>
+			";
+		}
+		add_action('admin_notices', 'cloudflare_warning');
+		return;
+    }
+    if (!$last_run_time || time() - $last_run_time > 5259487) { // 2 Months (avg)
+        function cloudflare_warning() {
+			echo "
+			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('Your Database is due to be optimized again.')."</strong> ".sprintf(__('We recommend that you <a href="%1$s">run the CloudFlare optimizer</a> every two months to keep your blog running quickly. It\'s time to run it again.'), "plugins.php?page=cloudflare-key-config")."</p></div>
 			";
 		}
 		add_action('admin_notices', 'cloudflare_warning');

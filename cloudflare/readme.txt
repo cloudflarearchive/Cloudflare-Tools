@@ -1,6 +1,6 @@
 === CloudFlare ===
-Contributors: ian
-Tags: cloudflare, comments, spam
+Contributors: i3149
+Tags: cloudflare, comments, spam, cdn
 Requires at least: 2.8
 Tested up to: 2.8
 Stable tag: 1.0.0
@@ -10,15 +10,17 @@ CloudFlare integrates your blog with the CloudFlare platform.
 
 == Description ==
 
-CloudFlare integrates your blog with the CloudFlare platform.
+The CloudFlare plugin integrates your blog with the CloudFlare platform.
 
-PS: You'll need an [CloudFlare.com API key](http://cloudflare.com/) to use it.
+The CloudFlare platform protects and accelerates any website online. Once your website is a part of the CloudFlare community, its web traffic is routed through our intelligent global network. We automatically optimize the delivery of your web pages so your visitors get the fastest page load times and best performance. We also block threats and limit abusive bots and crawlers from wasting your bandwidth and server resources. The result: CloudFlare-powered websites see a significant improvement in performance and a decrease in spam and other attacks.
+
+Learn more at [CloudFlare.com](https://www.cloudflare.com/overview.html).
 
 == Installation ==
 
-Upload the CloudFlare plugin to your blog, Activate it, then enter your [CloudFlare.com API key](http://clouflare.com).
+Upload the CloudFlare plugin to your blog, Activate it, and you're done!
 
-1, 2, 3: You're done!
+You will also want to sign up your blog with CloudFlare.com
 
 == Changelog ==
 

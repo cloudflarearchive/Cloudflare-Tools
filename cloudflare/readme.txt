@@ -2,11 +2,11 @@
 Contributors: i3149
 Tags: cloudflare, comments, spam, cdn
 Requires at least: 2.8
-Tested up to: 2.8
+Tested up to: 3.1
 Stable tag: 1.0.0
 License: GPLv2
 
-CloudFlare integrates your blog with the CloudFlare platform.
+The CloudFlare WordPress Plugin ensures your WordPress blog is running optimally on the CloudFlare platform.
 
 == Description ==
 

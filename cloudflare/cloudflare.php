@@ -52,7 +52,11 @@ function cloudflare_init() {
             break;
         }
     }
-	Add_action('admin_menu', 'cloudflare_config_page');
+
+    // Let people know that the CF WP plugin is turned on.
+    header("X-CF-Powered-By: WP " . CLOUDFLARE_VERSION);
+
+	add_action('admin_menu', 'cloudflare_config_page');
 	cloudflare_admin_warnings();
 }
 add_action('init', 'cloudflare_init');

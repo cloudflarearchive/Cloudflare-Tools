@@ -249,15 +249,9 @@ function cloudflare_admin_warnings() {
     // Check to see if they should optimized their DB
     $last_run_time = (int)get_option('cloudflare_api_db_last_run');
     if (!$last_run_time) {
-        function cloudflare_warning() {
-			echo "
-			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('Optimize your Database.')."</strong> ".sprintf(__('We recommend that you <a href="%1$s">run the CloudFlare optimizer</a> to keep your blog running quickly.'), "plugins.php?page=cloudflare-key-config")."</p></div>
-			";
-		}
-		add_action('admin_notices', 'cloudflare_warning');
-		return;
+        $last_run_time = time();
     }
-    if (!$last_run_time || time() - $last_run_time > 5259487) { // 2 Months (avg)
+    if (time() - $last_run_time > 5259487) { // 2 Months (avg)
         function cloudflare_warning() {
 			echo "
 			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('Your Database is due to be optimized again.')."</strong> ".sprintf(__('We recommend that you <a href="%1$s">run the CloudFlare optimizer</a> every two months to keep your blog running quickly. It\'s time to run it again.'), "plugins.php?page=cloudflare-key-config")."</p></div>

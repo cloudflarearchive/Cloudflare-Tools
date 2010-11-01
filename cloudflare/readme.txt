@@ -3,7 +3,7 @@ Contributors: i3149
 Tags: cloudflare, comments, spam, cdn
 Requires at least: 2.8
 Tested up to: 3.1
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2
 
 The CloudFlare WordPress Plugin ensures your WordPress blog is running optimally on the CloudFlare platform.
@@ -35,6 +35,10 @@ Upload the CloudFlare plugin to your blog, Activate it, and you're done!
 You will also want to sign up your blog with CloudFlare.com
 
 == Changelog ==
+
+= 1.0.1 =
+
+* Fix to check that it is OK to add a header before adding one.
 
 = 1.0.0 =
 

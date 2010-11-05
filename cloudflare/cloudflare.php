@@ -38,7 +38,7 @@ if ( !function_exists( 'add_action' ) ) {
 function cloudflare_init() {
 	global $cf_api_host, $cf_api_port, $is_cf;
 
-    $cf_api_host = "https://www.cloudflare.com/api.html?";
+    $cf_api_host = "https://www.cloudflare.com/ajax/external-event.html?";
     $cf_api_port = 80;
     $cf_ip_ranges = array("204.93.240.0/24", "204.93.177.0/24", "204.93.173.0/24", "199.27.128.0/21");
     $is_cf = ($_SERVER["HTTP_CF_CONNECTING_IP"])? TRUE: FALSE;    
@@ -187,29 +187,6 @@ The plugin is compatible with WordPress version 2.8.6 and later. The plugin will
 
 CloudFlare is a service that makes websites load faster and protects sites from online spammers and hackers. Any website with a root domain (ie www.mydomain.com) can use CloudFlare. On average, it takes less than 5 minutes to sign up. You can learn more here: <a href="http://www.cloudflare.com/">CloudFlare.com</a>.
 
-    <?php /**
-
-    <form action="" method="post" id="cloudflare-conf" style="margin: auto; width: 400px; ">
-    <?php if (get_option('cloudflare_api_key') && get_option('cloudflare_api_email')) { ?>
-    <p><?php printf(__('CloudFlare is accelerating and protecting your site.')); ?></p>
-    <?php } else { ?> 
-        <p><?php printf(__('For many people, <a href="%1$s">CloudFlare</a> will accelerate and protect their website. If you don\'t have an API key yet for CloudFlare, you can get one at <a href="%2$s">CloudFlare.com</a>.'), 'http://cloudflare.com/', 'http://cloudflare.com/'); ?></p>
-    <?php } ?>
-    <?php if ($ms) { foreach ( $ms as $m ) { ?>
-    <p style="padding: .5em; background-color: #<?php echo $messages[$m]['color']; ?>; color: #fff; font-weight: bold;"><?php echo $messages[$m]['text']; ?></p>
-    <?php } } ?>
-    <h3><label for="key"><?php _e('CloudFlare API Key'); ?></label></h3>
-    <p><input id="key" name="key" type="text" size="50" maxlength="48" value="<?php echo get_option('cloudflare_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://cloudflare.com/">What is this?</a>'); ?>)</p>
-    <h3><label for="email"><?php _e('CloudFlare API Email'); ?></label></h3>
-    <p><input id="email" name="email" type="text" size="50" maxlength="48" value="<?php echo get_option('cloudflare_api_email'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="http://cloudflare.com/">What is this?</a>'); ?>)</p>
-
-    <p class="submit"><input type="submit" name="submit" value="<?php _e('Update options &raquo;'); ?>" /></p>
-    </form>
-
-    <hr />
-
-    */ ?>
-
     <form action="" method="post" id="cloudflare-db">
     <input type="hidden" name="optimize" value="1" />
     <p class="submit">
@@ -217,6 +194,25 @@ CloudFlare is a service that makes websites load faster and protects sites from 
     <input type="submit" name="submit" value="<?php _e('Run the optimizer'); ?>" /> (<?php _e('<a href="http://www.cloudflare.com/wiki/WordPressDBOptimizer">What is this?</a>'); ?>)
     </p>
     </form>
+
+    <hr />
+
+    <form action="" method="post" id="cloudflare-conf">
+    <?php if (get_option('cloudflare_api_key') && get_option('cloudflare_api_email')) { ?>
+    <?php } else { ?> 
+        <p><?php printf(__('For many people, <a href="%1$s">CloudFlare</a> will accelerate and protect their website. If you don\'t have an API key yet for CloudFlare, you can get one at <a href="%2$s">CloudFlare.com</a>.'), 'http://cloudflare.com/', 'http://cloudflare.com/'); ?></p>
+    <?php } ?>
+    <?php if ($ms) { foreach ( $ms as $m ) { ?>
+    <p style="padding: .5em; background-color: #<?php echo $messages[$m]['color']; ?>; color: #fff; font-weight: bold;"><?php echo $messages[$m]['text']; ?></p>
+    <?php } } ?>
+    <h3><label for="key"><?php _e('CloudFlare API Key'); ?></label></h3>
+    <p><input id="key" name="key" type="text" size="50" maxlength="48" value="<?php echo get_option('cloudflare_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="https://www.cloudflare.com/my-account.html">Get this?</a>'); ?>)</p>
+    <h3><label for="email"><?php _e('CloudFlare API Email'); ?></label></h3>
+    <p><input id="email" name="email" type="text" size="50" maxlength="48" value="<?php echo get_option('cloudflare_api_email'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="https://www.cloudflare.com/my-account.html">Get this?</a>'); ?>)</p>
+
+    <p class="submit"><input type="submit" name="submit" value="<?php _e('Update options &raquo;'); ?>" /></p>
+    </form>
+
         <?php //    </div> ?>
     </div>
     <?php
@@ -265,7 +261,7 @@ function cloudflare_admin_warnings() {
 
 // Now actually allow CF to see when a comment is approved/not-approved.
 function cloudflare_set_comment_status($id, $status) {
-	global $cf_api_host, $cf_api_port, $cloudflare_api_key, $cloudflare_api_email; 
+    global $cf_api_host, $cf_api_port, $cloudflare_api_key, $cloudflare_api_email; 
     if (!$cf_api_host || !$cf_api_port) {
         return;
     }
@@ -274,13 +270,18 @@ function cloudflare_set_comment_status($id, $status) {
         return;
     }
 
+    // ajax/external-event.html?email=ian@cloudflare.com&t=94606855d7e42adf3b9e2fd004c7660b941b8e55aa42d&evnt_v={%22dd%22:%22d%22}&evnt_t=WP_SPAM
     $comment = get_comment($id);
-    $url = $cf_api_host . "key=" . $comment->comment_author_IP . "&u=$cloudflare_api_email&tkn=$cloudflare_api_key&a=";
+    $value = array("a" => $comment->comment_author, 
+                   "am" => $comment->comment_author_email,
+                   "ip" => $comment->comment_author_IP,
+                   "con" => substr($comment->comment_content, 0, 100));
+    $url = $cf_api_host . "evnt_v=" . urlencode(json_encode($value)) . "&u=$cloudflare_api_email&tkn=$cloudflare_api_key&evnt_t=";
      
     // If spam, send this info over to CloudFlare.
     if ($status == "spam") {
-        $url .= "chl";
-        file_put_contents("/tmp/ckc", file_get_contents($url));
+        $url .= "WP_SPAM";
+        @file_get_contents($url);
     }
 }
 

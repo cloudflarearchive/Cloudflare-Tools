@@ -3,7 +3,7 @@
 Plugin Name: CloudFlare
 Plugin URI: http://www.cloudflare.com/wiki/CloudFlareWordPressPlugin
 Description: CloudFlare integrates your blog with the CloudFlare platform.
-Version: 1.0.1
+Version: 1.1.0
 Author: Ian Pye (CloudFlare Team)
 License: GPLv2
 */
@@ -26,7 +26,7 @@ Plugin adapted from the Akismet WP plugin.
 
 */	
 
-define('CLOUDFLARE_VERSION', '1.0.1');
+define('CLOUDFLARE_VERSION', '1.1.0');
 require_once("ip_in_range.php");
 
 // Make sure we don't expose any info if called directly
@@ -167,6 +167,7 @@ CloudFlare has developed a plugin for WordPress. By using the CloudFlare WordPre
 <ol>
 <li>Correct IP Address information for comments posted to your site</li>
 <li>Optimization of your server database (optional)</li>
+<li>Better protection as spammers from your WordPress blog get reported to CloudFlare (coming soon)</li>
 </ol>
 
 <h4>VERSION COMPATIBILITY:</h4>
@@ -180,7 +181,12 @@ The plugin is compatible with WordPress version 2.8.6 and later. The plugin will
  
 <li>This plugin can also help to ensure your server database is running optimally. If you are going to run the Database Optimizer associated with this plugin, then run it at a low traffic time. While the Database Optimizer is running, your site will go into Read Only mode, which means that you or your visitors will not be allowed to post. The optimizer should run quickly. Once the optimizer is done running, you will be able to post to your site again. To run the Database Optimizer, click the icon below.</li>
 
+<li>Coming soon: Every time you click the 'spam' button on your blog, this threat information will get sent to CloudFlare to ensure you are constantly getting the best site protection.</li>
+
 <li>We recommend that any user on CloudFlare with WordPress use this plugin. </li>
+
+<li>NOTE: This plugin is complimentary to Akismet and W3 Total Cache. We recommend that you continue to use those services.</li> 
+
 </ol>
 
 <h4>MORE INFORMATION ON CLOUDFLARE:</h4>
@@ -189,21 +195,23 @@ CloudFlare is a service that makes websites load faster and protects sites from 
 
     <form action="" method="post" id="cloudflare-db">
     <input type="hidden" name="optimize" value="1" />
-    <p class="submit">
-    <h3><label for="optimize_db"><?php _e('Make your site run even faster. Run the Database Optimizer now. (optional)'); ?></label></h3>
-    <input type="submit" name="submit" value="<?php _e('Run the optimizer'); ?>" /> (<?php _e('<a href="http://www.cloudflare.com/wiki/WordPressDBOptimizer">What is this?</a>'); ?>)
-    </p>
+
+    <h4><label for="optimize_db"><?php _e('DATABASE OPTIMIZER (optional): Make your site run even faster.'); ?></label>
+    <input type="submit" name="submit" value="<?php _e('Run the optimizer'); ?>" /> (<?php _e('<a href="http://www.cloudflare.com/wiki/WordPressDBOptimizer">What is this?</a>'); ?>)</h4>
+
     </form>
+
+    <?php if ($is_cf) { ?>
 
     <hr />
 
     <form action="" method="post" id="cloudflare-conf">
     <?php if (get_option('cloudflare_api_key') && get_option('cloudflare_api_email')) { ?>
     <?php } else { ?> 
-        <p><?php printf(__('For many people, <a href="%1$s">CloudFlare</a> will accelerate and protect their website. If you don\'t have an API key yet for CloudFlare, you can get one at <a href="%2$s">CloudFlare.com</a>.'), 'http://cloudflare.com/', 'http://cloudflare.com/'); ?></p>
+        <p><?php printf(__('Input your API key from your CloudFlare Accounts Settings page here. To find your API key, log in to <a href="%1$s">CloudFlare</a> and go to \'Account\'.'), 'https://www.cloudflare.com/my-account.html'); ?></p>
     <?php } ?>
     <?php if ($ms) { foreach ( $ms as $m ) { ?>
-    <p style="padding: .5em; background-color: #<?php echo $messages[$m]['color']; ?>; color: #fff; font-weight: bold;"><?php echo $messages[$m]['text']; ?></p>
+    <p style="padding: .5em; color: #<?php echo $messages[$m]['color']; ?>; font-weight: bold;"><?php echo $messages[$m]['text']; ?></p>
     <?php } } ?>
     <h3><label for="key"><?php _e('CloudFlare API Key'); ?></label></h3>
     <p><input id="key" name="key" type="text" size="50" maxlength="48" value="<?php echo get_option('cloudflare_api_key'); ?>" style="font-family: 'Courier New', Courier, mono; font-size: 1.5em;" /> (<?php _e('<a href="https://www.cloudflare.com/my-account.html">Get this?</a>'); ?>)</p>
@@ -212,6 +220,8 @@ CloudFlare is a service that makes websites load faster and protects sites from 
 
     <p class="submit"><input type="submit" name="submit" value="<?php _e('Update options &raquo;'); ?>" /></p>
     </form>
+    
+    <?php } ?>
 
         <?php //    </div> ?>
     </div>

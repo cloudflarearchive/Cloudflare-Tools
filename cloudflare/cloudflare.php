@@ -3,7 +3,7 @@
 Plugin Name: CloudFlare
 Plugin URI: http://www.cloudflare.com/wiki/CloudFlareWordPressPlugin
 Description: CloudFlare integrates your blog with the CloudFlare platform.
-Version: 1.1.0
+Version: 1.1.1
 Author: Ian Pye (CloudFlare Team)
 License: GPLv2
 */
@@ -26,7 +26,7 @@ Plugin adapted from the Akismet WP plugin.
 
 */	
 
-define('CLOUDFLARE_VERSION', '1.1.0');
+define('CLOUDFLARE_VERSION', '1.1.1');
 require_once("ip_in_range.php");
 
 // Make sure we don't expose any info if called directly
@@ -70,7 +70,7 @@ add_action('admin_init', 'cloudflare_admin_init');
 
 function cloudflare_config_page() {
 	if ( function_exists('add_submenu_page') ) {
-		add_submenu_page('plugins.php', __('CloudFlare Configuration'), __('CloudFlare'), 'manage_options', 'cloudflare-key-config', 'cloudflare_conf');
+		add_submenu_page('plugins.php', __('CloudFlare Configuration'), __('CloudFlare'), 'manage_options', 'cloudflare', 'cloudflare_conf');
     }
 }
 

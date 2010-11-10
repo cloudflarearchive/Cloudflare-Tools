@@ -38,6 +38,8 @@ Upload the CloudFlare plugin to your blog, Activate it, and you're done!
 
 You will also want to sign up your blog with CloudFlare.com
 
+[Read more](http://blog.cloudflare.com/introducing-the-cloudflare-wordpress-plugin) on why we created this plugin.
+
 == Changelog ==
 
 = 1.1.1 =

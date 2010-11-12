@@ -38,8 +38,8 @@ if ( !function_exists( 'add_action' ) ) {
 function cloudflare_init() {
 	global $cf_api_host, $cf_api_port, $is_cf;
 
-    $cf_api_host = "https://www.cloudflare.com/ajax/external-event.html?";
-    $cf_api_port = 80;
+    $cf_api_host = "ssl://www.cloudflare.com";
+    $cf_api_port = 443;
     $cf_ip_ranges = array("204.93.240.0/24", "204.93.177.0/24", "204.93.173.0/24", "199.27.128.0/21");
     $is_cf = ($_SERVER["HTTP_CF_CONNECTING_IP"])? TRUE: FALSE;    
 
@@ -286,12 +286,23 @@ function cloudflare_set_comment_status($id, $status) {
                    "am" => $comment->comment_author_email,
                    "ip" => $comment->comment_author_IP,
                    "con" => substr($comment->comment_content, 0, 100));
-    $url = $cf_api_host . "evnt_v=" . urlencode(json_encode($value)) . "&u=$cloudflare_api_email&tkn=$cloudflare_api_key&evnt_t=";
+    $url = "/ajax/external-event.html?evnt_v=" . urlencode(json_encode($value)) . "&u=$cloudflare_api_email&tkn=$cloudflare_api_key&evnt_t=";
      
     // If spam, send this info over to CloudFlare.
     if ($status == "spam") {
         $url .= "WP_SPAM";
-        @file_get_contents($url);
+        $fp = @fsockopen($cf_api_host, $cf_api_port, $errno, $errstr, 30);
+        if ($fp) {
+            $out = "GET $url HTTP/1.1\r\n";
+            $out .= "Host: www.cloudflare.com\r\n";
+            $out .= "Connection: Close\r\n\r\n";
+            fwrite($fp, $out);
+            $res = "";
+            while (!feof($fp)) {
+                $res .= fgets($fp, 128);
+            }
+            fclose($fp);
+        }
     }
 }
 

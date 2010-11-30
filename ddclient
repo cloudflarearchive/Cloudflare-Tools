@@ -3668,14 +3668,14 @@ sub nic_cloudflare_update {
             foreach my $line (@body) {
                 my @res = split /\t/, $line;
                 if ($res[1] eq "E_NOUPDATE") {
-                    $config{$h}{'ip'}     = $ip;
-                    $config{$h}{'mtime'}  = $now;
-                    $config{$h}{'status'} = 'good';
+                    $config{$res[0]}{'ip'}     = $ip;
+                    $config{$res[0]}{'mtime'}  = $now;
+                    $config{$res[0]}{'status'} = 'good';
                     warning ("%s -- %s", $res[0], $errors{"E_NOUPDATE"});
                 } elsif ($res[1] eq "OK") {
-                    $config{$h}{'ip'}     = $ip;
-                    $config{$h}{'mtime'}  = $now;
-                    $config{$h}{'status'} = 'good';
+                    $config{$res[0]}{'ip'}     = $ip;
+                    $config{$res[0]}{'mtime'}  = $now;
+                    $config{$res[0]}{'status'} = 'good';
                     success ("%s -- Updated Successfully to %s", $res[0], $ip);
                 }
             }

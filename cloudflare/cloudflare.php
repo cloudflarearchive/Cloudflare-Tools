@@ -3,7 +3,7 @@
 Plugin Name: CloudFlare
 Plugin URI: http://www.cloudflare.com/wiki/CloudFlareWordPressPlugin
 Description: CloudFlare integrates your blog with the CloudFlare platform.
-Version: 1.1.1
+Version: 1.1.2
 Author: Ian Pye (CloudFlare Team)
 License: GPLv2
 */
@@ -26,7 +26,7 @@ Plugin adapted from the Akismet WP plugin.
 
 */	
 
-define('CLOUDFLARE_VERSION', '1.1.1');
+define('CLOUDFLARE_VERSION', '1.1.2');
 require_once("ip_in_range.php");
 
 // Make sure we don't expose any info if called directly
@@ -155,15 +155,7 @@ function cloudflare_conf() {
     <div class="wrap">
 
     <?php if ($is_cf) { ?>
-    <h3>You are currently using CloudFlare!</h3>
-    <?php } else { ?>
-    <h3>You are not currently using CloudFlare. Sign up for CloudFlare <a href="http://www.cloudflare.com/" target="_blank">here</a>. Once you are on CloudFlare, this plugin will automatically work.</h3>
-    <p>
-    The most common reason for the message above is that www is not added to your DNS zone file. Please add www under your <a href="http://www.cloudflare.com/dns-settings.html" target="_blank">DNS Settings</a> by making a CNAME record of www as an alias to your domain.com.
-    <br />
-    Note: This error message will also be displayed if you are on direct.yourdomain.com, or a similar subdomain.
-    </p>
-
+        <h3>You are currently using CloudFlare!</h3>
     <?php } ?>
 
     <h4><?php _e('CLOUDFLARE WORDPRESS PLUGIN:'); ?></h4>

@@ -2,7 +2,7 @@
 Contributors: i3149
 Tags: cloudflare, comments, spam, cdn
 Requires at least: 2.8
-Tested up to: 3.1
+Tested up to: 3.0.4
 Stable tag: 1.1.1
 License: GPLv2
 

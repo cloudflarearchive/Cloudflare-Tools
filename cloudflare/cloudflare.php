@@ -243,7 +243,7 @@ function cloudflare_admin_warnings() {
 	if ( !get_option('cloudflare_api_key_set_once') && !$cloudflare_api_key && !isset($_POST['submit']) ) {
 		function cloudflare_warning() {
 			echo "
-			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('CloudFlare is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your CloudFlare API key</a> for it to work.'), "plugins.php?page=cloudflare-key-config")."</p></div>
+			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('CloudFlare is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your CloudFlare API key</a> for it to work.'), "plugins.php?page=cloudflare")."</p></div>
 			";
 		}
 		add_action('admin_notices', 'cloudflare_warning');
@@ -251,7 +251,7 @@ function cloudflare_admin_warnings() {
 	} else if ( !get_option('cloudflare_api_key_set_once') && !$cloudflare_api_email && !isset($_POST['submit']) ) {
 		function cloudflare_warning() {
 			echo "
-			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('CloudFlare is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your CloudFlare API email</a> for it to work.'), "plugins.php?page=cloudflare-key-config")."</p></div>
+			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('CloudFlare is almost ready.')."</strong> ".sprintf(__('You must <a href="%1$s">enter your CloudFlare API email</a> for it to work.'), "plugins.php?page=cloudflare")."</p></div>
 			";
 		}
 		add_action('admin_notices', 'cloudflare_warning');
@@ -267,7 +267,7 @@ function cloudflare_admin_warnings() {
     if (time() - $last_run_time > 5259487) { // 2 Months (avg)
         function cloudflare_warning() {
 			echo "
-			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('Your Database is due to be optimized again.')."</strong> ".sprintf(__('We recommend that you <a href="%1$s">run the CloudFlare optimizer</a> every two months to keep your blog running quickly. It\'s time to run it again.'), "plugins.php?page=cloudflare-key-config")."</p></div>
+			<div id='cloudflare-warning' class='updated fade'><p><strong>".__('Your Database is due to be optimized again.')."</strong> ".sprintf(__('We recommend that you <a href="%1$s">run the CloudFlare optimizer</a> every two months to keep your blog running quickly. It\'s time to run it again.'), "plugins.php?page=cloudflare")."</p></div>
 			";
 		}
 		add_action('admin_notices', 'cloudflare_warning');

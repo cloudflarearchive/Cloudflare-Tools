@@ -140,13 +140,15 @@ function cloudflare_conf() {
             if (count($db_results) == 0) {
                 $db_results[] = "All tables optimized without error.";
             }
+        } else {
+            $db_results[] = "The current user does not have the permission \"manage_database\". Please run the command again with an appropriate user.";
         }
     }
 
     ?>
     <?php if ( !empty($_POST['submit'] ) && !($_POST['optimize']) ) { ?>
     <div id="message" class="updated fade"><p><strong><?php _e('Options saved.') ?></strong></p></div>
-    <?php } else if ( isset($_POST['submit']) && isset($_POST['optimize']) ) { 
+    <?php } else if ( isset($_POST['submit']) && isset($_POST['optimize']) ) {
     foreach ($db_results as $res) {
         ?><div id="message" class="updated fade"><p><strong><?php _e($res) ?></strong></p></div><?php
     }

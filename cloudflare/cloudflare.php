@@ -127,7 +127,7 @@ function cloudflare_conf() {
                           );
     } else if ( isset($_POST['submit']) && isset($_POST['optimize']) ) {
         update_option('cloudflare_api_db_last_run', time());
-        if(current_user_can('manage_database')) {
+        if(current_user_can('edit_files')) {
             remove_action('admin_notices', 'cloudflare_warning');
             $tables = $wpdb->get_col("SHOW TABLES");
             foreach($tables as $table_name) {

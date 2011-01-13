@@ -3,7 +3,7 @@ Contributors: i3149
 Tags: cloudflare, comments, spam, cdn, free, website, performance, speed
 Requires at least: 2.8
 Tested up to: 3.0.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2
 
 The CloudFlare WordPress Plugin ensures your WordPress blog is running optimally on the CloudFlare platform.
@@ -41,6 +41,10 @@ You will also want to sign up your blog with CloudFlare.com
 [Read more](http://blog.cloudflare.com/introducing-the-cloudflare-wordpress-plugin) on why we created this plugin.
 
 == Changelog ==
+
+= 1.1.3 =
+
+* Better permission checking for DB optimizer.
 
 = 1.1.2 =
 

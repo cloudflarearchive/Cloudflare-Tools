@@ -45,6 +45,7 @@ You will also want to sign up your blog with CloudFlare.com
 = 1.1.3 =
 
 * Better permission checking for DB optimizer.
+* Added CloudFlare's latest /20 to the list of CloudFlare IP ranges.
 
 = 1.1.2 =
 

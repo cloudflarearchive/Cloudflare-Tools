@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<install type="module" version="0.1.0">
+<install type="module" version="1.5.0">
     <name>CloudFlare</name>
     <author>Ian Pye</author>
-    <version>0.1.0</version>
+    <version>1.5.0</version>
     <description>A module to make Joomla instances work with CloudFlare.</description>
     <files>
         <filename>mod_cloudflare.xml</filename>

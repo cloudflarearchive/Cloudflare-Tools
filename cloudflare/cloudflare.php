@@ -166,8 +166,8 @@ function cloudflare_conf() {
 CloudFlare has developed a plugin for WordPress. By using the CloudFlare WordPress Plugin, you receive: 
 <ol>
 <li>Correct IP Address information for comments posted to your site</li>
+<li>Better protection as spammers from your WordPress blog get reported to CloudFlare</li>
 <li>Optimization of your server database (optional)</li>
-<li>Better protection as spammers from your WordPress blog get reported to CloudFlare (coming soon)</li>
 </ol>
 
 <h4>VERSION COMPATIBILITY:</h4>
@@ -181,25 +181,17 @@ The plugin is compatible with WordPress version 2.8.6 and later. The plugin will
  
 <li>This plugin can also help to ensure your server database is running optimally. If you are going to run the Database Optimizer associated with this plugin, then run it at a low traffic time. While the Database Optimizer is running, your site will go into Read Only mode, which means that you or your visitors will not be allowed to post. The optimizer should run quickly. Once the optimizer is done running, you will be able to post to your site again. To run the Database Optimizer, click the icon below.</li>
 
-<li>Coming soon: Every time you click the 'spam' button on your blog, this threat information will get sent to CloudFlare to ensure you are constantly getting the best site protection.</li>
+<li>Every time you click the 'spam' button on your blog, this threat information is sent to CloudFlare to ensure you are constantly getting the best site protection.</li>
 
 <li>We recommend that any user on CloudFlare with WordPress use this plugin. </li>
 
-<li>NOTE: This plugin is complimentary to Akismet and W3 Total Cache. We recommend that you continue to use those services.</li> 
+<li>NOTE: This plugin is complementary to Akismet and W3 Total Cache. We recommend that you continue to use those services.</li> 
 
 </ol>
 
 <h4>MORE INFORMATION ON CLOUDFLARE:</h4>
 
 CloudFlare is a service that makes websites load faster and protects sites from online spammers and hackers. Any website with a root domain (ie www.mydomain.com) can use CloudFlare. On average, it takes less than 5 minutes to sign up. You can learn more here: <a href="http://www.cloudflare.com/">CloudFlare.com</a>.
-
-    <form action="" method="post" id="cloudflare-db">
-    <input type="hidden" name="optimize" value="1" />
-
-    <h4><label for="optimize_db"><?php _e('DATABASE OPTIMIZER (optional): Make your site run even faster.'); ?></label>
-    <input type="submit" name="submit" value="<?php _e('Run the optimizer'); ?>" /> (<?php _e('<a href="http://www.cloudflare.com/wiki/WordPressDBOptimizer">What is this?</a>'); ?>)</h4>
-
-    </form>
 
     <?php 
 // if ($is_cf) {
@@ -226,6 +218,14 @@ CloudFlare is a service that makes websites load faster and protects sites from 
     <?php 
     // } 
     ?>
+
+    <form action="" method="post" id="cloudflare-db">
+    <input type="hidden" name="optimize" value="1" />
+
+    <h4><label for="optimize_db"><?php _e('DATABASE OPTIMIZER (optional): Make your site run even faster.'); ?></label>
+    <input type="submit" name="submit" value="<?php _e('Run the optimizer'); ?>" /> (<?php _e('<a href="http://www.cloudflare.com/wiki/WordPressDBOptimizer">What is this?</a>'); ?>)</h4>
+
+    </form>
 
         <?php //    </div> ?>
     </div>

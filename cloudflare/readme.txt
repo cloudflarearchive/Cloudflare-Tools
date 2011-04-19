@@ -16,7 +16,7 @@ CloudFlare has developed a plugin for WordPress. By using the CloudFlare WordPre
 
 * Optimization of your server database 
 
-* Better protection as spammers from your WordPress blog get reported to CloudFlare (coming soon)
+* Better protection as spammers from your WordPress blog get reported to CloudFlare
 
 THINGS YOU NEED TO KNOW:
 
@@ -24,7 +24,7 @@ THINGS YOU NEED TO KNOW:
 
 * This plugin can also help to ensure your server database is running optimally. If you are going to run the Database Optimizer associated with this plugin, then run it at a low traffic time. While the database optimizer is running, your site will go into Read Only mode, which means that you or your visitors will not be allowed to post. The optimizer should run quickly. Once the optimizer is done running, you will be able to post to your site again. 
 
-* Coming soon: Every time you click the 'spam' button on your blog, this threat information will get sent to CloudFlare to ensure you are constantly getting the best site protection.
+* Every time you click the 'spam' button on your blog, this threat information is sent to CloudFlare to ensure you are constantly getting the best site protection.
 
 * We recommend that any user on WordPress and CloudFlare should use this plugin. 
 
@@ -41,6 +41,10 @@ You will also want to sign up your blog with CloudFlare.com
 [Read more](http://blog.cloudflare.com/introducing-the-cloudflare-wordpress-plugin) on why we created this plugin.
 
 == Changelog ==
+
+= 1.1.4 =
+
+* Updated messaging.
 
 = 1.1.3 =
 

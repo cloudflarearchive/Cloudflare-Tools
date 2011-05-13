@@ -27,7 +27,7 @@ class modCloudFlare {
         global $is_cf;
 
         $is_cf = FALSE;
-        $cf_ip_ranges = array("204.93.240.0/24", "204.93.177.0/24", "204.93.173.0/24", "199.27.128.0/21", "173.245.48.0/20");
+        $cf_ip_ranges = array("204.93.240.0/24", "204.93.177.0/24", "199.27.128.0/21", "173.245.48.0/20", "103.22.200.0/22");
         foreach ($cf_ip_ranges as $range) {
             if (ip_in_range($_SERVER["REMOTE_ADDR"], $range)) {
                 if ($_SERVER["HTTP_CF_CONNECTING_IP"]) {

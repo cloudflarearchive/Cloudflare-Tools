@@ -3,7 +3,7 @@
 Plugin Name: CloudFlare
 Plugin URI: http://www.cloudflare.com/wiki/CloudFlareWordPressPlugin
 Description: CloudFlare integrates your blog with the CloudFlare platform.
-Version: 1.1.4
+Version: 1.1.5
 Author: Ian Pye (CloudFlare Team)
 License: GPLv2
 */
@@ -26,7 +26,7 @@ Plugin adapted from the Akismet WP plugin.
 
 */	
 
-define('CLOUDFLARE_VERSION', '1.1.4');
+define('CLOUDFLARE_VERSION', '1.1.5');
 require_once("ip_in_range.php");
 
 // Make sure we don't expose any info if called directly
@@ -40,7 +40,7 @@ function cloudflare_init() {
 
     $cf_api_host = "ssl://www.cloudflare.com";
     $cf_api_port = 443;
-    $cf_ip_ranges = array("204.93.240.0/24", "204.93.177.0/24", "204.93.173.0/24", "199.27.128.0/21", "173.245.48.0/20");
+    $cf_ip_ranges = array("204.93.240.0/24", "204.93.177.0/24", "199.27.128.0/21", "173.245.48.0/20", "103.22.200.0/22");
     $is_cf = ($_SERVER["HTTP_CF_CONNECTING_IP"])? TRUE: FALSE;    
 
     // Update the REMOTE_ADDR value if the current REMOTE_ADDR value is in the specified range.

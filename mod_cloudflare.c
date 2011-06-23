@@ -21,7 +21,7 @@
  * CloudFlareIPHeader CF-Connecting-IP
  * CloudFlareIPTrustedProxy 204.93.173.0/24
  *
- * Version 1.0.1
+ * Version 1.0.2
  */
 
 #include "ap_config.h"
@@ -40,8 +40,8 @@
 module AP_MODULE_DECLARE_DATA cloudflare_module;
 
 #define CF_DEFAULT_IP_HEADER "CF-Connecting-IP"
-#define CF_DEFAULT_TRUSTED_PROXY {"204.93.240.0/24", "204.93.177.0/24", "199.27.128.0/21", "173.245.48.0/20", "103.22.200.0/22"}
-#define CF_DEFAULT_TRUSTED_PROXY_COUNT 5
+#define CF_DEFAULT_TRUSTED_PROXY {"204.93.240.0/24", "204.93.177.0/24", "199.27.128.0/21", "173.245.48.0/20", "103.22.200.0/22", "141.101.64.0/18"}
+#define CF_DEFAULT_TRUSTED_PROXY_COUNT 6
 
 typedef struct {
     /** A proxy IP mask to match */

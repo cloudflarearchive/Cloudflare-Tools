@@ -2,8 +2,8 @@
 Contributors: i3149
 Tags: cloudflare, comments, spam, cdn, free, website, performance, speed
 Requires at least: 2.8
-Tested up to: 3.1.2
-Stable tag: 1.1.5
+Tested up to: 3.1.3
+Stable tag: 1.1.6
 License: GPLv2
 
 The CloudFlare WordPress Plugin ensures your WordPress blog is running optimally on the CloudFlare platform.
@@ -42,9 +42,13 @@ You will also want to sign up your blog with CloudFlare.com
 
 == Changelog ==
 
+= 1.1.6 =
+
+* Includes latest CloudFlare IP allocation -- 141.101.64.0/18.
+
 = 1.1.5 =
 
-* Includes latest CloudFlare IP allocation.
+* Includes latest CloudFlare IP allocation -- 103.22.200.0/22.
 
 = 1.1.4 =
 

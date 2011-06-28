@@ -3,7 +3,7 @@
 Plugin Name: CloudFlare
 Plugin URI: http://www.cloudflare.com/wiki/CloudFlareWordPressPlugin
 Description: CloudFlare integrates your blog with the CloudFlare platform.
-Version: 1.1.6
+Version: 1.1.7
 Author: Ian Pye (CloudFlare Team)
 License: GPLv2
 */
@@ -26,7 +26,7 @@ Plugin adapted from the Akismet WP plugin.
 
 */	
 
-define('CLOUDFLARE_VERSION', '1.1.6');
+define('CLOUDFLARE_VERSION', '1.1.7');
 require_once("ip_in_range.php");
 
 // Make sure we don't expose any info if called directly
@@ -92,30 +92,34 @@ function cloudflare_conf() {
 
     $db_results = array();
                
-	if ( isset($_POST['submit']) && !($_POST['optimize']) ) {
+	if ( isset($_POST['submit']) 
+         && !($_POST['optimize']) 
+         && check_admin_referer('cloudflare-db-api','cloudflare-db-api-nonce') ) {
+        
 		if ( function_exists('current_user_can') && !current_user_can('manage_options') ) {
 			die(__('Cheatin&#8217; uh?'));
         }
 
 		$key = $_POST['key'];
 		$email = $_POST['email'];
+
 		if ( empty($key) ) {
 			$key_status = 'empty';
 			$ms[] = 'new_key_empty';
 			delete_option('cloudflare_api_key');
 		} else {
             $ms[] = 'new_key_valid';
-			update_option('cloudflare_api_key', $key);
+			update_option('cloudflare_api_key', esc_sql($key));
             update_option('cloudflare_api_key_set_once', "TRUE");
         }
 
-		if ( empty($email) ) {
+		if ( empty($email) || !is_email($email) ) {
 			$email_status = 'empty';
 			$ms[] = 'new_email_empty';
 			delete_option('cloudflare_api_email');
 		} else {
 			$ms[] = 'new_email_valid';
-			update_option('cloudflare_api_email', $email);
+			update_option('cloudflare_api_email', esc_sql($email));
             update_option('cloudflare_api_email_set_once', "TRUE");
         }
 
@@ -125,7 +129,10 @@ function cloudflare_conf() {
                           'new_email_empty' => array('color' => 'aa0', 'text' => __('Your email has been cleared.')),
                           'new_email_valid' => array('color' => '2d2', 'text' => __('Your email has been verified. Happy blogging!')),
                           );
-    } else if ( isset($_POST['submit']) && isset($_POST['optimize']) ) {
+    } else if ( isset($_POST['submit']) 
+                && isset($_POST['optimize'])
+                && check_admin_referer('cloudflare-db-opt','cloudflare-db-opt-nonce')) {
+
         update_option('cloudflare_api_db_last_run', time());
         if(current_user_can('edit_files')) {
             remove_action('admin_notices', 'cloudflare_warning');
@@ -200,6 +207,7 @@ CloudFlare is a service that makes websites load faster and protects sites from 
     <hr />
 
     <form action="" method="post" id="cloudflare-conf">
+    <?php wp_nonce_field('cloudflare-db-api','cloudflare-db-api-nonce'); ?>
     <?php if (get_option('cloudflare_api_key') && get_option('cloudflare_api_email')) { ?>
     <?php } else { ?> 
         <p><?php printf(__('Input your API key from your CloudFlare Accounts Settings page here. To find your API key, log in to <a href="%1$s">CloudFlare</a> and go to \'Account\'.'), 'https://www.cloudflare.com/my-account.html'); ?></p>
@@ -220,6 +228,7 @@ CloudFlare is a service that makes websites load faster and protects sites from 
     ?>
 
     <form action="" method="post" id="cloudflare-db">
+    <?php wp_nonce_field('cloudflare-db-opt','cloudflare-db-opt-nonce'); ?>
     <input type="hidden" name="optimize" value="1" />
 
     <h4><label for="optimize_db"><?php _e('DATABASE OPTIMIZER (optional): Make your site run even faster.'); ?></label>

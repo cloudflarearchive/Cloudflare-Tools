@@ -42,6 +42,10 @@ You will also want to sign up your blog with CloudFlare.com
 
 == Changelog ==
 
+= 1.1.7 =
+
+* Implements several security updates.
+
 = 1.1.6 =
 
 * Includes latest CloudFlare IP allocation -- 141.101.64.0/18.

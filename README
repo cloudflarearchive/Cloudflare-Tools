@@ -20,13 +20,7 @@ CloudFlareRemoteIPHeader CF-Connecting-IP
 
 * CloudFlareRemoteIPTrustedProxy 
 
-This is the IP range from which we will allow the CloudFlareRemoteIPHeader to be used from. Default:
-
-CloudFlareRemoteIPTrustedProxy 204.93.240.0/24
-CloudFlareRemoteIPTrustedProxy 204.93.177.0/24
-CloudFlareRemoteIPTrustedProxy 204.93.173.0/24
-CloudFlareRemoteIPTrustedProxy 199.27.128.0/21
-CloudFlareRemoteIPTrustedProxy 173.245.48.0/20
+This is the IP range from which we will allow the CloudFlareRemoteIPHeader to be used from. See https://www.cloudflare.com/wiki/What_are_the_CloudFlare_IP_address_ranges.
 
 Note that on some Debian systems, you may have to add a LoadModule directive manually. This should look like:
 

@@ -1,6 +1,6 @@
 Name:		mod_cloudflare
 Version:	1.0.2
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Cloudflare Apache Module
 
 Group:		System Environment/Daemons
@@ -46,6 +46,10 @@ rm -rf $RPM_BUILD_ROOT
 /etc/httpd/conf.d/cloudflare.conf
 
 %changelog
+* Thu Jan 26 2012 Corey Henderson <corman@cormander.com> [1.0.2-2.el6]
+- use _libdir macro instead of /usr/lib
+- cloudflare.conf is small enough to not need a source file
+ 
 * Wed Jan 18 2012 Corey Henderson <corman@cormander.com> [1.0.2-1.el6]
 - Initial build.
 

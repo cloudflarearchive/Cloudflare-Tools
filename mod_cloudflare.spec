@@ -1,13 +1,12 @@
 Name:		mod_cloudflare
 Version:	1.0.2
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Cloudflare Apache Module
 
 Group:		System Environment/Daemons
 License:	ASL-2.0
 URL:		http://www.cloudflare.com/
 Source0:	https://raw.github.com/cloudflare/CloudFlare-Tools/master/mod_cloudflare.c
-Source1:	cloudflare.conf
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:	httpd-devel
@@ -22,7 +21,6 @@ address of the visitor.
 %prep
 %setup -c -T
 cp $RPM_SOURCE_DIR/mod_cloudflare.c .
-cp $RPM_SOURCE_DIR/cloudflare.conf .
 
 %build
 apxs -c mod_cloudflare.c
@@ -30,11 +28,12 @@ apxs -c mod_cloudflare.c
 %install
 rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/usr/lib/httpd/modules/
+mkdir -p $RPM_BUILD_ROOT/%{_libdir}/httpd/modules/
 mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d/
 
-install -m 755 .libs/mod_cloudflare.so $RPM_BUILD_ROOT/usr/lib/httpd/modules/mod_cloudflare.so
-install -m 644 cloudflare.conf $RPM_BUILD_ROOT/etc/httpd/conf.d/cloudflare.conf
+install -m 755 .libs/mod_cloudflare.so $RPM_BUILD_ROOT/%{_libdir}/httpd/modules/mod_cloudflare.so
+echo "LoadModule cloudflare_module modules/mod_cloudflare.so" > $RPM_BUILD_ROOT/etc/httpd/conf.d/cloudflare.conf
+chmod 644 $RPM_BUILD_ROOT/etc/httpd/conf.d/cloudflare.conf
 
 
 %clean
@@ -43,10 +42,14 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-/usr/lib/httpd/modules/mod_cloudflare.so
+%{_libdir}/httpd/modules/mod_cloudflare.so
 /etc/httpd/conf.d/cloudflare.conf
 
 %changelog
+* Thu Jan 26 2012 Corey Henderson <corman@cormander.com> [1.0.2-2.el6]
+- use _libdir macro instead of /usr/lib
+- cloudflare.conf is small enough to not need a source file
+ 
 * Wed Jan 18 2012 Corey Henderson <corman@cormander.com> [1.0.2-1.el6]
 - Initial build.
 

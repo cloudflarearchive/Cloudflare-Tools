@@ -7,7 +7,6 @@ Group:		System Environment/Daemons
 License:	ASL-2.0
 URL:		http://www.cloudflare.com/
 Source0:	https://raw.github.com/cloudflare/CloudFlare-Tools/master/mod_cloudflare.c
-Source1:	cloudflare.conf
 BuildRoot:	%(mktemp -ud %{_tmppath}/%{name}-%{version}-%{release}-XXXXXX)
 
 BuildRequires:	httpd-devel
@@ -22,7 +21,6 @@ address of the visitor.
 %prep
 %setup -c -T
 cp $RPM_SOURCE_DIR/mod_cloudflare.c .
-cp $RPM_SOURCE_DIR/cloudflare.conf .
 
 %build
 apxs -c mod_cloudflare.c
@@ -34,7 +32,8 @@ mkdir -p $RPM_BUILD_ROOT/%{_libdir}/httpd/modules/
 mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d/
 
 install -m 755 .libs/mod_cloudflare.so $RPM_BUILD_ROOT/%{_libdir}/httpd/modules/mod_cloudflare.so
-install -m 644 cloudflare.conf $RPM_BUILD_ROOT/etc/httpd/conf.d/cloudflare.conf
+echo "LoadModule cloudflare_module modules/mod_cloudflare.so" > $RPM_BUILD_ROOT/etc/httpd/conf.d/cloudflare.conf
+chmod 644 $RPM_BUILD_ROOT/etc/httpd/conf.d/cloudflare.conf
 
 
 %clean

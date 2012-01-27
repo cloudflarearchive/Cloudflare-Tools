@@ -30,10 +30,10 @@ apxs -c mod_cloudflare.c
 %install
 rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/usr/lib/httpd/modules/
+mkdir -p $RPM_BUILD_ROOT/%{_libdir}/httpd/modules/
 mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d/
 
-install -m 755 .libs/mod_cloudflare.so $RPM_BUILD_ROOT/usr/lib/httpd/modules/mod_cloudflare.so
+install -m 755 .libs/mod_cloudflare.so $RPM_BUILD_ROOT/%{_libdir}/httpd/modules/mod_cloudflare.so
 install -m 644 cloudflare.conf $RPM_BUILD_ROOT/etc/httpd/conf.d/cloudflare.conf
 
 
@@ -43,7 +43,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-/usr/lib/httpd/modules/mod_cloudflare.so
+%{_libdir}/httpd/modules/mod_cloudflare.so
 /etc/httpd/conf.d/cloudflare.conf
 
 %changelog

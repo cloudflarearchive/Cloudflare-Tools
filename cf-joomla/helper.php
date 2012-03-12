@@ -11,7 +11,7 @@
  * other free or open source software licenses.
  */
 
-define('CLOUDFLARE_VERSION', '0.1.3');
+define('CLOUDFLARE_VERSION', '0.1.4');
 require_once("ip_in_range.php");
 
 class modCloudFlare {

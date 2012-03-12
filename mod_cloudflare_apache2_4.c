@@ -431,6 +431,10 @@ static int cloudflare_modify_connection(request_rec *r)
      */
     c->client_ip = apr_pstrdup(c->pool, c->client_ip);
     conn->proxied_ip = c->client_ip;
+    
+    r->useragent_ip = c->client_ip;
+    r->useragent_addr = c->client_addr;
+    
     memcpy(&conn->proxied_addr, &temp_sa, sizeof(temp_sa));
     conn->proxied_addr.pool = c->pool;
     // Causing an error with mod_authz_host

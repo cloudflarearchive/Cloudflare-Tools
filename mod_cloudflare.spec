@@ -1,6 +1,6 @@
 Name:		mod_cloudflare
 Version:	1.0.2
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Cloudflare Apache Module
 
 Group:		System Environment/Daemons
@@ -20,36 +20,45 @@ address of the visitor.
 
 %prep
 %setup -c -T
-cp $RPM_SOURCE_DIR/mod_cloudflare.c .
+cp %{SOURCE0} .
+cat > cloudflare.conf <<EOF
+LoadModule cloudflare_module modules/mod_cloudflare.so
+<IfModule mod_cloudflare.c>
+	#CloudFlareRemoteIPHeader CF-Connecting-IP
+	#CloudFlareRemoteIPTrustedProxy 204.93.240.0/24 204.93.177.0/24 199.27.128.0/21 173.245.48.0/20 103.22.200.0/22 141.101.64.0/18 108.162.192.0/18
+	#DenyAllButCloudFlare
+</IfModule>
+EOF
 
 %build
 apxs -c mod_cloudflare.c
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
-mkdir -p $RPM_BUILD_ROOT/%{_libdir}/httpd/modules/
-mkdir -p $RPM_BUILD_ROOT/etc/httpd/conf.d/
-
-install -m 755 .libs/mod_cloudflare.so $RPM_BUILD_ROOT/%{_libdir}/httpd/modules/mod_cloudflare.so
-echo "LoadModule cloudflare_module modules/mod_cloudflare.so" > $RPM_BUILD_ROOT/etc/httpd/conf.d/cloudflare.conf
-chmod 644 $RPM_BUILD_ROOT/etc/httpd/conf.d/cloudflare.conf
-
+install -d %{buildroot}%{_libdir}/httpd/modules
+install -m 755 .libs/mod_cloudflare.so %{buildroot}%{_libdir}/httpd/modules/mod_cloudflare.so
+install -d %{buildroot}%{_sysconfdir}/httpd/conf.d
+install -m 644 cloudflare.conf %{buildroot}%{_sysconfdir}/httpd/conf.d/cloudflare.conf
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 
 %files
 %defattr(-,root,root,-)
 %{_libdir}/httpd/modules/mod_cloudflare.so
-/etc/httpd/conf.d/cloudflare.conf
+%config(noreplace) %{_sysconfdir}/httpd/conf.d/cloudflare.conf
 
 %changelog
+* Mon Feb 27 2012 Alex Headley <aheadley@nexcess.net> [1.0.2-3]
+- use _sysconfdir instead of /etc
+- add config directive examples to config file and change config file generation
+
 * Thu Jan 26 2012 Corey Henderson <corman@cormander.com> [1.0.2-2.el6]
 - use _libdir macro instead of /usr/lib
 - cloudflare.conf is small enough to not need a source file
- 
+
 * Wed Jan 18 2012 Corey Henderson <corman@cormander.com> [1.0.2-1.el6]
 - Initial build.
 

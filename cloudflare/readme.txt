@@ -41,7 +41,11 @@ You will also want to sign up your blog with CloudFlare.com
 [Read more](http://blog.cloudflare.com/introducing-the-cloudflare-wordpress-plugin) on why we created this plugin.
 
 == Changelog ==
-= 1.2.2=
+
+= 1.2.3 =  
+* Updated with new IP range
+
+= 1.2.2 =
 * Restricted database optimization to administrators
 
 = 1.2.1 =

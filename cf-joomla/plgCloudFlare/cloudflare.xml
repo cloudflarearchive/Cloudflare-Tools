@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<install version="2.5" type="plugin" group="system">
+<name>CloudFlare Plugin</name>
+<author>Jerome Chen</author>
+<creationDate>March 2012</creationDate>
+<authorEmail>jerome@cloudflare.com</authorEmail>
+<authorUrl>http://cloudflare.com</authorUrl>
+<version>1.0.0</version>
+<description>Plugin for making Joomla sites work with CloudFlare</description>
+<files>
+<filename plugin="cloudflare">cloudflare.php</filename>
+<filename>ip_in_range.php</filename>
+</files>
+<params>
+  <param name="cloudflare"
+  type="text"
+  default=""
+  label="CloudFlare"
+ />
+</params>
+</install>

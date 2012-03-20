@@ -1,6 +1,6 @@
 Name:		mod_cloudflare
 Version:	1.0.2
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	Cloudflare Apache Module
 
 Group:		System Environment/Daemons
@@ -25,7 +25,7 @@ cat > cloudflare.conf <<EOF
 LoadModule cloudflare_module modules/mod_cloudflare.so
 <IfModule mod_cloudflare.c>
 	#CloudFlareRemoteIPHeader CF-Connecting-IP
-	#CloudFlareRemoteIPTrustedProxy 204.93.240.0/24 204.93.177.0/24 199.27.128.0/21 173.245.48.0/20 103.22.200.0/22 141.101.64.0/18 108.162.192.0/18
+	#CloudFlareRemoteIPTrustedProxy 204.93.240.0/24 204.93.177.0/24 199.27.128.0/21 173.245.48.0/20 103.22.200.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20
 	#DenyAllButCloudFlare
 </IfModule>
 EOF
@@ -51,6 +51,9 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/httpd/conf.d/cloudflare.conf
 
 %changelog
+* Tue Mar 20 2012 Shaun Ladewig <shaun@r6an.com> [1.0.2-4]
+* updated cloudflare.conf for new ip range (190.93.240.0/20).
+
 * Mon Feb 27 2012 Alex Headley <aheadley@nexcess.net> [1.0.2-3]
 - use _sysconfdir instead of /etc
 - add config directive examples to config file and change config file generation

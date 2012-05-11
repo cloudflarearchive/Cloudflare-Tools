@@ -40,7 +40,12 @@ function cloudflare_init() {
 
     $cf_api_host = "ssl://www.cloudflare.com";
     $cf_api_port = 443;
-    $cf_ip_ranges = array("204.93.240.0/24", "204.93.177.0/24", "199.27.128.0/21", "173.245.48.0/20", "103.22.200.0/22", "141.101.64.0/18", "108.162.192.0/18","190.93.240.0/20");
+    // Let's get the IPs from the official cloudflare IPv4 list URL, which has the latest up to date list.
+    $ips_v4_list = file_get_contents("https://www.cloudflare.com/ips-v4");
+    $cf_ip_ranges = explode("\n", $ips_v4_list);
+    foreach ($cf_ip_ranges as $key=>$val) {
+        $cf_ip_ranges[$key] = trim($val);
+    }
     $is_cf = ($_SERVER["HTTP_CF_CONNECTING_IP"])? TRUE: FALSE;    
 
     // Update the REMOTE_ADDR value if the current REMOTE_ADDR value is in the specified range.

@@ -50,7 +50,7 @@ function cloudflare_init() {
         $request_file_refresh = TRUE;
     } else {
         $time_since_last_update = time() - $last_modified;
-        if ($time_since_last_update > 40) {
+        if ($time_since_last_update > 86400) {
             $request_file_refresh = TRUE;
         }
     }

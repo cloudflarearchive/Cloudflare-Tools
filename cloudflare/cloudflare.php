@@ -69,7 +69,6 @@ function cloudflare_init() {
         $cf_ip_ranges = explode("\n", $ipv4_file_data);
     }
 
-
     foreach ($cf_ip_ranges as $key=>$val) {
         $cf_ip_ranges[$key] = trim($val);
     }

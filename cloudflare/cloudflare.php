@@ -3,8 +3,8 @@
 Plugin Name: CloudFlare
 Plugin URI: http://www.cloudflare.com/wiki/CloudFlareWordPressPlugin
 Description: CloudFlare integrates your blog with the CloudFlare platform.
-Version: 1.2.3
-Author: Ian Pye, Jerome Chen (CloudFlare Team)
+Version: 1.2.4
+Author: Ian Pye, Jerome Chen, James Greene (CloudFlare Team)
 License: GPLv2
 */
 
@@ -26,7 +26,7 @@ Plugin adapted from the Akismet WP plugin.
 
 */	
 
-define('CLOUDFLARE_VERSION', '1.2.1');
+define('CLOUDFLARE_VERSION', '1.2.4');
 require_once("ip_in_range.php");
 
 // Make sure we don't expose any info if called directly
@@ -36,16 +36,16 @@ if ( !function_exists( 'add_action' ) ) {
 }
 
 function cloudflare_init() {
-	global $cf_api_host, $cf_api_port, $is_cf;
+    global $cf_api_host, $cf_api_port, $is_cf;
 
     $cf_api_host = "ssl://www.cloudflare.com";
     $cf_api_port = 443;
-    // Let's get the IPs from the official cloudflare IPv4 list URL, which has the latest up to date list.
-    
-    $request_file_refresh = FALSE;
+    $plugin_dir = plugin_dir_path(__FILE__);
 
-    $ipv4_file_data = @file_get_contents("ipv4_list.txt");
-    $last_modified = @filemtime("ipv4_list.txt");
+    // Let's get the IPs from the official cloudflare IPv4 list URL, which has the latest up to date list.
+    $request_file_refresh = FALSE;
+    $ipv4_file_data = @file_get_contents($plugin_dir . "ipv4_list.txt");
+    $last_modified = @filemtime($plugin_dir . "ipv4_list.txt");
     if ($last_modified === FALSE) {
         $request_file_refresh = TRUE;
     } else {
@@ -59,7 +59,7 @@ function cloudflare_init() {
         $live_ips_v4_list = @file_get_contents("https://www.cloudflare.com/ips-v4");
         
         if ($live_ips_v4_list !== FALSE && trim($live_ips_v4_list) != "") {
-            file_put_contents("ipv4_list.txt", $live_ips_v4_list);
+            @file_put_contents($plugin_dir . "ipv4_list.txt", $live_ips_v4_list);
             $cf_ip_ranges = explode("\n", $live_ips_v4_list);
         } else {
             // Use the default static list for now, until we are able to access the live updated list again.
@@ -89,8 +89,8 @@ function cloudflare_init() {
     if (!headers_sent()) {
         header("X-CF-Powered-By: WP " . CLOUDFLARE_VERSION);
     }
-	add_action('admin_menu', 'cloudflare_config_page');
-	cloudflare_admin_warnings();
+    add_action('admin_menu', 'cloudflare_config_page');
+    cloudflare_admin_warnings();
 }
 add_action('init', 'cloudflare_init',1);
 

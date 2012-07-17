@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 #!/usr/local/bin/perl -w
 ######################################################################
-# $Id: ddclient 120 2010-09-14 11:19:47Z wimpunk $
+# $Id: ddclient 130 2011-07-11 21:02:07Z wimpunk $
 #
 # DDCLIENT - a Perl client for updating DynDNS information
 #
@@ -20,9 +20,9 @@ use Getopt::Long;
 use Sys::Hostname;
 use IO::Socket;
 
-my ($VERSION) = q$Revision: 120 $ =~ /(\d+)/;
+my ($VERSION) = q$Revision: 130 $ =~ /(\d+)/;
 
-my $version  = "3.8.0-r". $VERSION;
+my $version  = "3.8.1";
 my $programd  = $0; 
 $programd =~ s%^.*/%%;
 my $program   = $programd;
@@ -82,6 +82,11 @@ my %builtinfw = (
 				  'name' => 'SMC Barricade FW',
 				  'url'  => '/status.htm',
 				  'skip' => 'IP Address',
+			        },
+    'smc-barricade-alt'      => {
+				  'name' => 'SMC Barricade FW (alternate config)',
+				  'url'  => '/status.HTM',
+				  'skip' => 'WAN IP',
 			        },
     'smc-barricade-7401bra'  => {
 				  'name' => 'SMC Barricade 7401BRA FW',
@@ -417,6 +422,13 @@ my %variables = (
 	'warned-min-interval'       => setv(T_ANY,    0, 1, 0, 0,             undef),
 	'warned-min-error-interval' => setv(T_ANY,    0, 1, 0, 0,             undef),
     },
+    'zoneedit-service-common-defaults'       => {
+        'zone'                => setv(T_OFQDN,  0, 0, 1, undef,               undef),
+    },
+    'dtdns-common-defaults'       => {
+	'login'               => setv(T_LOGIN,  0, 0, 0, 'unused',            undef),
+	'client'              => setv(T_STRING, 0, 1, 1, $program,            undef),
+    },
     'cloudflare-common-defaults'       => {
 	'server'	          => setv(T_FQDNP,  1, 0, 1, 'www.cloudflare.com', undef),
 	'static'              => setv(T_BOOL,   0, 1, 1, 0,                   undef),
@@ -494,6 +506,7 @@ my %services = (
 			  { 'server'       => setv(T_FQDNP,  1, 0, 1, 'dynamic.zoneedit.com', undef)          },
 			  { 'min-interval' => setv(T_DELAY,  0, 0, 1, interval('5m'), 0),},
  			  $variables{'service-common-defaults'},
+ 			  $variables{'zoneedit-service-common-defaults'},
 		        ),
     },
     'easydns' => {
@@ -547,6 +560,15 @@ my %services = (
 			  { 'min-interval' => setv(T_DELAY,  0, 0, 1, 0, interval('5m')),},
 			  $variables{'service-common-defaults'},
 			),
+    },
+    'dtdns' => {
+	'updateable' => undef,
+	'update'     => \&nic_dtdns_update,
+	'examples'   => \&nic_dtdns_examples,
+	'variables'  => merge(
+			  $variables{'dtdns-common-defaults'},
+			  $variables{'service-common-defaults'},
+		        ),
     },
     'cloudflare' => {
         'updateable' => undef,
@@ -758,47 +780,58 @@ sub runpostscript {
 ## update_nics
 ######################################################################
 sub update_nics {
-    my %examined = ();
+	my %examined = ();
+	my %iplist = ();
 
-    foreach my $s (sort keys %services) {
-	my (@hosts, %ips) = ();
-	my $updateable = $services{$s}{'updateable'};
-	my $update     = $services{$s}{'update'};
+	foreach my $s (sort keys %services) {
+		my (@hosts, %ips) = ();
+		my $updateable = $services{$s}{'updateable'};
+		my $update     = $services{$s}{'update'};
 
+		foreach my $h (sort keys %config) {
+			next if $config{$h}{'protocol'} ne lc($s);
+			$examined{$h} = 1;
+			my $use = $config{$h}{'use'} || opt('use');
+			local $opt{$use} = $config{$h}{$use} if $config{$h}{$use};
+			# bug #13: we should only do this once
+			# use isn't enough, we have to save the origin to.
+			# this will break the multiple ip stuff if use has 
+			# been used twice for the same device.
+			my $ip = "";
+			if (defined $iplist{$use}) {
+				$ip = $iplist{$use};
+			} else {
+				$ip = get_ip($use, $h);
+				if (!defined $ip || !$ip) {
+					warning("unable to determine IP address")
+						if !$daemon || opt('verbose');
+					next;
+				}
+				if ($ip !~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
+					warning("malformed IP address (%s)", $ip);
+					next;
+				}
+				$iplist{$use} = $ip;
+			}
+			$config{$h}{'wantip'} = $ip;
+			next if !nic_updateable($h, $updateable);
+			push @hosts, $h;
+			$ips{$ip} = $h;
+		}
+		if (@hosts) {
+			$0 = sprintf("%s - updating %s", $program, join(',', @hosts));
+			&$update(@hosts);
+			runpostscript(join ' ', keys %ips);
+		}
+	}
 	foreach my $h (sort keys %config) {
-	    next if $config{$h}{'protocol'} ne lc($s);
-	    $examined{$h} = 1;
-	    my $use = $config{$h}{'use'} || opt('use');
-	    local $opt{$use} = $config{$h}{$use} if $config{$h}{$use};
-	    my $ip = get_ip($use, $h);
-	    if (!defined $ip || !$ip) {
-		warning("unable to determine IP address")
-		    if !$daemon || opt('verbose');
-		next;
-	    }
-	    if ($ip !~ /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/) {
-		warning("malformed IP address (%s)", $ip);
-		next;
-	    }
-	    $config{$h}{'wantip'} = $ip;
-	    next if !nic_updateable($h, $updateable);
-	    push @hosts, $h;
-	    $ips{$ip} = $h;
+		if (!exists $examined{$h}) {
+			failed("%s was not updated because protocol %s is not supported.", 
+					$h, define($config{$h}{'protocol'}, '<undefined>')
+				  );
+		}
 	}
-	if (@hosts) {
-            $0 = sprintf("%s - updating %s", $program, join(',', @hosts));
-	    &$update(@hosts);
-	    runpostscript(join ' ', keys %ips);
-	}
-    }
-    foreach my $h (sort keys %config) {
-	if (!exists $examined{$h}) {
-	    failed("%s was not updated because protocol %s is not supported.", 
-		$h, define($config{$h}{'protocol'}, '<undefined>')
-	    );
-	}
-    }
-    write_cache(opt('cache'));
+	write_cache(opt('cache'));
 }
 ######################################################################
 ## unlink_pid()
@@ -1742,11 +1775,6 @@ sub encode_base64 ($;$) {
     # fix padding at the end
     my $padding = (3 - length($_[0]) % 3) % 3;
     $res =~ s/.{$padding}$/'=' x $padding/e if $padding;
-
-    # break encoded string into lines of no more than 76 characters each
-    if (length $eol) {
-        $res =~ s/(.{1,76})/$1$eol/g;
-    }
     $res;
 }
 ######################################################################
@@ -1831,7 +1859,7 @@ sub geturl {
     $request .= "Host: $server\n";
 
     my $auth = encode_base64("${login}:${password}");
-    $request .= "Authorization: Basic $auth" if $login || $password;
+    $request .= "Authorization: Basic $auth\n" if $login || $password;
     $request .= "User-Agent: ${program}/${version}\n";
     $request .= "Connection: close\n";
     $request .= "\n";
@@ -2173,11 +2201,14 @@ sub nic_updateable {
 
     } elsif (defined($sub) && &$sub($host)) {
 	$update = 1;
-
-    } elsif (($cache{$host}{'static'} ne $config{$host}{'static'}) ||
-	     ($cache{$host}{'wildcard'} ne $config{$host}{'wildcard'}) ||
-	     ($cache{$host}{'mx'} ne $config{$host}{'mx'}) ||
-	     ($cache{$host}{'backupmx'} ne $config{$host}{'backupmx'})) {
+    } elsif ((defined($cache{$host}{'static'}) && defined($config{$host}{'static'}) &&
+              ($cache{$host}{'static'} ne $config{$host}{'static'})) ||
+             (defined($cache{$host}{'wildcard'}) && defined($config{$host}{'wildcard'}) &&
+              ($cache{$host}{'wildcard'} ne $config{$host}{'wildcard'})) ||
+             (defined($cache{$host}{'mx'}) && defined($config{$host}{'mx'}) &&
+              ($cache{$host}{'mx'} ne $config{$host}{'mx'})) ||
+             (defined($cache{$host}{'backupmx'}) && defined($config{$host}{'backupmx'}) &&
+              ($cache{$host}{'backupmx'} ne $config{$host}{'backupmx'})) ) {
 	info("updating %s because host settings have been changed.", $host);
 	$update = 1;
 
@@ -2889,6 +2920,11 @@ www.zoneedit.com.
 Configuration variables applicable to the 'zoneedit1' protocol are:
   protocol=zoneedit1           ## 
   server=fqdn.of.service       ## defaults to www.zoneedit.com
+  zone=zone-where-domains-are  ## only needed if 1 or more subdomains are deeper
+                               ## than 1 level in relation to  the zone where it
+                               ## is defined. For example, b.foo.com in a zone
+                               ## foo.com doesn't need this, but a.b.foo.com in
+                               ## the same zone needs zone=foo.com
   login=service-login          ## login name and password  registered with the service
   password=service-password    ##
   your.domain.name             ## the host registered with the service.
@@ -2896,7 +2932,8 @@ Configuration variables applicable to the 'zoneedit1' protocol are:
 Example ${program}.conf file entries:
   ## single host update
   protocol=zoneedit1,                                     \\
-  server=dynamic.zoneedit.com,                                \\
+  server=dynamic.zoneedit.com,                            \\
+  zone=zone-where-domains-are,                            \\
   login=my-zoneedit-login,                                \\
   password=my-zoneedit-password                           \\
   my.domain.name
@@ -2920,7 +2957,7 @@ sub nic_zoneedit1_update {
     debug("\nnic_zoneedit1_update -------------------");
 
     ## group hosts with identical attributes together 
-    my %groups = group_hosts_by([ @_ ], [ qw(login password server) ]);
+    my %groups = group_hosts_by([ @_ ], [ qw(login password server zone) ]);
 
     ## update each set of hosts that had similar configurations
     foreach my $sig (keys %groups) {
@@ -2937,6 +2974,7 @@ sub nic_zoneedit1_update {
 	$url  .= "http://$config{$h}{'server'}/auth/dynamic.html";
 	$url  .= "?host=$hosts";
 	$url  .= "&dnsto=$ip"   if $ip;
+	$url  .= "&zone=$config{$h}{'zone'}" if defined $config{$h}{'zone'};
 
 	my $reply = geturl(opt('proxy'), $url, $config{$h}{'login'}, $config{$h}{'password'});
 	if (!defined($reply) || !$reply) {
@@ -3537,16 +3575,27 @@ sub nic_freedns_update {
 	info("setting IP address to %s for %s", $ip, $h);
 	verbose("UPDATE:","updating %s", $h);
 
-	if($ip ne $freedns_hosts{$h}->[1]) {
+	if($ip eq $freedns_hosts{$h}->[1]) { 
+	    $config{$h}{'ip'}     = $ip; 
+	    $config{$h}{'mtime'}  = $now; 
+	    $config{$h}{'status'} = 'good'; 
+	    success("update not necessary %s: good: IP address already set to %s", $h, $ip); 
+	} else {
 	    my $reply = geturl(opt('proxy'), $freedns_hosts{$h}->[2]);
 	    if (!defined($reply) || !$reply) {
 	        failed("updating %s: Could not connect to %s.", $h, $freedns_hosts{$h}->[2]);
 		last;
 	    }
-	    last if !header_ok($h, $reply);
+	    if(!header_ok($h, $reply)) { 
+		$config{$h}{'status'} = 'failed'; 
+		last; 
+	    }
 
-	    if($reply =~ /Updated.*host/) {
-	        success("updating %s: good: IP address set to %s", $h, $ip);
+	    if($reply =~ /Updated.*$h.*to.*$ip/) { 
+		$config{$h}{'ip'}     = $ip; 
+		$config{$h}{'mtime'}  = $now; 
+		$config{$h}{'status'} = 'good'; 
+		success("updating %s: good: IP address set to %s", $h, $ip); 
 	    } else {
 	        $config{$h}{'status'} = 'failed';
 		warning("SENT: %s", $freedns_hosts{$h}->[2]) unless opt('verbose');
@@ -3554,6 +3603,89 @@ sub nic_freedns_update {
 		failed("updating %s: Invalid reply.", $h);
 	    }
 	}
+    }
+}
+
+######################################################################
+
+######################################################################
+## nic_dtdns_examples
+######################################################################
+sub nic_dtdns_examples {
+    return <<EoEXAMPLE; 
+o 'dtdns'
+                          
+The 'dtdns' protocol is the protocol used by the dynamic hostname services
+of the 'DtDNS' dns services. This is currently used by the free
+dynamic DNS service offered by www.dtdns.com.
+    
+Configuration variables applicable to the 'dtdns' protocol are:
+  protocol=dtdns               ## 
+  server=www.fqdn.of.service   ## defaults to www.dtdns.com
+  password=service-password    ## password registered with the service
+  client=name_of_updater       ## defaults to $program (10 chars max, no spaces)
+  fully.qualified.host         ## the host registered with the service.
+                        
+Example ${program}.conf file entries:
+  ## single host update
+  protocol=dtdns,                                       \\
+  password=my-dydns.za.net-password,                    \\
+  client=ddclient                                       \\
+  myhost.dtdns.net
+                        
+EoEXAMPLE
+}
+
+######################################################################
+## nic_dtdns_update
+## by Achim Franke
+######################################################################
+sub nic_dtdns_update {
+    debug("\nnic_dtdns_update -------------------");
+
+    ## update each configured host
+    foreach my $h (@_) {
+	my $ip = delete $config{$h}{'wantip'};
+        info("setting IP address to %s for %s", $ip, $h);
+        verbose("UPDATE:","updating %s", $h);
+
+        # Set the URL that we're going to to update
+        my $url;
+        $url  = "http://$config{$h}{'server'}/api/autodns.cfm";
+        $url .= "?id=";
+        $url .= $h;
+        $url .= "&pw=";
+        $url .= $config{$h}{'password'};
+        $url .= "&ip=";
+        $url .= $ip;
+        $url .= "&client=";
+        $url .= $config{$h}{'client'};
+
+        # Try to get URL
+        my $reply = geturl(opt('proxy'), $url);
+
+        # No response, declare as failed
+        if (!defined($reply) || !$reply) {
+            failed("updating %s: Could not connect to %s.", $h, $config{$h}{'server'});
+            last;
+        }
+        last if !header_ok($h, $reply);
+
+        # Response found, just declare as success (this is ugly, we need more error checking)
+        if ($reply =~ /now\spoints\sto/)
+        {
+                $config{$h}{'ip'}     = $ip;
+                $config{$h}{'mtime'}  = $now;
+                $config{$h}{'status'} = 'good';
+                success("updating %s: good: IP address set to %s", $h, $ip);
+         }
+         else
+         {
+                my @reply = split /\n/, $reply;
+                my $returned = pop(@reply);
+                $config{$h}{'status'} = 'failed';
+                failed("updating %s: Server said: '$returned'", $h);
+         }
     }
 }
 
@@ -3666,7 +3798,8 @@ sub nic_cloudflare_update {
             failed ("%s", $errors{"E_DUPHST"});
         } else {
             foreach my $line (@body) {
-                my @res = split /\t/, $line;
+                my @resp = split(/\t/, $line);
+		my @res  = split(/\s/, $resp[0]);
                 if ($res[1] eq "E_NOUPDATE") {
                     $config{$res[0]}{'ip'}     = $ip;
                     $config{$res[0]}{'mtime'}  = $now;

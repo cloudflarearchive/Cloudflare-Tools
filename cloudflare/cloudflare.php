@@ -3,7 +3,7 @@
 Plugin Name: CloudFlare
 Plugin URI: http://www.cloudflare.com/wiki/CloudFlareWordPressPlugin
 Description: CloudFlare integrates your blog with the CloudFlare platform.
-Version: 1.3.6
+Version: 1.3.7
 Author: Ian Pye, Jerome Chen, James Greene (CloudFlare Team)
 License: GPLv2
 */
@@ -26,7 +26,7 @@ Plugin adapted from the Akismet WP plugin.
 
 */	
 
-define('CLOUDFLARE_VERSION', '1.3.6');
+define('CLOUDFLARE_VERSION', '1.3.7');
 require_once("ip_in_range.php");
 
 // Make sure we don't expose any info if called directly
@@ -198,7 +198,6 @@ CloudFlare has developed a plugin for WordPress. By using the CloudFlare WordPre
 <ol>
 <li>Correct IP Address information for comments posted to your site</li>
 <li>Better protection as spammers from your WordPress blog get reported to CloudFlare</li>
-<li>Optimization of your server database (optional)</li>
 </ol>
 
 <h4>VERSION COMPATIBILITY:</h4>

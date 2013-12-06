@@ -1,0 +1,5 @@
+libapache2-mod-cloudflare (20120606-1) unstable; urgency=low
+
+  * Initial Debian version.
+
+ -- Cyril Bouthors <cyril@bouthors.org>  Wed, 06 Jun 2012 16:24:14 +0200

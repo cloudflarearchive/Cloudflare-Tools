@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = configure ] ; then
+# only enable on new installs, not on upgrades
+    if [ -z "$2" ] ; then
+	a2enmod -q cloudflare
+    fi
+# only restart if mod_cloudflare is enabled
+    if [ -e /etc/apache2/mods-enabled/cloudflare.load ] ; then
+	invoke-rc.d apache2 restart
+    fi
+fi
+
+#DEBHELPER#

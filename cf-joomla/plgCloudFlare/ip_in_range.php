@@ -1,4 +1,5 @@
 <?php
+	defined( '_JEXEC' ) or die( 'Restricted access' );
 
 /*
  * ip_in_range.php - Function to determine if an IP is located in a
@@ -93,4 +94,3 @@ function ip_in_range($ip, $range) {
         return false;
     } 
 }
-?>

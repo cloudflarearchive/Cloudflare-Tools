@@ -119,12 +119,14 @@ function get_ipv6_full($ip)
 {
     $pieces = explode ("/", $ip, 2);
     $left_piece = $pieces[0];
-    $right_piece = $pieces[1];
+    $right_piece = null;
+    if (count($pieces) > 1) $right_piece = $pieces[1];
 
     // Extract out the main IP pieces
     $ip_pieces = explode("::", $left_piece, 2);
     $main_ip_piece = $ip_pieces[0];
-    $last_ip_piece = $ip_pieces[1];
+    $last_ip_piece = null;
+    if (count($ip_pieces) > 1) $last_ip_piece = $ip_pieces[1];
 
     // Pad out the shorthand entries.
     $main_ip_pieces = explode(":", $main_ip_piece);

@@ -19,11 +19,6 @@
  * Source website: http://www.pgregg.com/projects/php/ip_in_range/
  * Version 1.2
  *
- * This software is Donationware - if you feel you have benefited from
- * the use of this tool then please consider a donation. The value of
- * which is entirely left up to your discretion.
- * http://www.pgregg.com/donate/
- *
  * Please do not remove this header, or source attibution from this file.
  */
 
